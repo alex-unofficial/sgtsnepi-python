@@ -3,11 +3,11 @@ from ctypes.util import find_library
 
 from ctypes import c_int, c_double, c_uint32, POINTER
 
+from math import inf
+
 import numpy
 import numpy.ctypeslib
-from scipy.sparse import csc_matrix
 
-from math import inf
 from nextprod import nextprod
 
 
@@ -33,7 +33,7 @@ libsgtsne.tsnepi_c.restype = c_double_p
 
 
 def _sgtsnepi_c(
-        P, y0=None, d=2, max_iter=1000, early_exag=250, lambda_par=1,
+        input_graph, y0=None, d=2, max_iter=1000, early_exag=250, lambda_par=1,
         np=0, h=1.0, bb=-1.0, eta=200.0, run_exact=False, fftw_single=False,
         alpha=12, profile=False, drop_leaf=False,
         list_grid_sizes = [nextprod((2, 3, 5), x) for x in range(16,512)],
@@ -51,16 +51,16 @@ def _sgtsnepi_c(
 
     grid_sizes = None
 
-    # extract CSC data from P
-    n = P.shape[0]
-    nnz = P.nnz
+    # extract CSC data from input_graph
+    n = input_graph.shape[0]
+    nnz = input_graph.nnz
 
-    ptr_rows = P.indices.ctypes.data_as(c_uint32_p)
-    ptr_cols = P.indptr.ctypes.data_as(c_uint32_p)
-    ptr_vals = P.data.ctypes.data_as(c_double_p)
+    ptr_rows = input_graph.indices.ctypes.data_as(c_uint32_p)
+    ptr_cols = input_graph.indptr.ctypes.data_as(c_uint32_p)
+    ptr_vals = input_graph.data.ctypes.data_as(c_double_p)
 
     # Create y0 pointer
-    ptr_y0 = None if y0 is None else y0.ctypes.data_as(d_double_p)
+    ptr_y0 = None if y0 is None else y0.ctypes.data_as(c_double_p)
 
     # Setting parameters correctly
     if grid_threshold is None:
@@ -93,6 +93,5 @@ def _sgtsnepi_c(
 
     if profile:
         return y, time_info
-    else:
-        return y
 
+    return y
