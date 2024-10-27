@@ -5,7 +5,7 @@ This repository aims to provide a `Python` interface to
 software for swift embedding of a large, sparse graph into
 a d-dimensional space (d=1,2,3) on a shared-memory computer.
 
-[!WARNING]
+**Warning**
 This repository is still a work in progress and is not ready for general use.
 
 ## Installation
