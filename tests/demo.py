@@ -2,6 +2,9 @@ from .context import sgtsnepi
 
 import sys
 
+import numpy as np
+import numpy.random
+
 from scipy.io import mmread
 from scipy.sparse import csc_matrix
 
@@ -14,8 +17,23 @@ if __name__ == '__main__':
     with open(mm_filename) as mm_file:
         P = csc_matrix(mmread(mm_file))
 
-    y = sgtsnepi.sgtsne._sgtsnepi_c(P, h=0.7)
+    n = P.shape[0]
+    n_dim = int(sys.argv[2])
 
-    plt.figure()
-    plt.scatter(y[0], y[1], 0.5)
-    plt.show()
+    y = sgtsnepi.sgtsne._sgtsnepi_c(P, d=n_dim, h=0.7)
+
+    if n_dim == 2:
+        fig = plt.figure()
+        ax = fig.add_subplot()
+
+        ax.scatter(y[0], y[1])
+
+        plt.show()
+
+    if n_dim == 3:
+        fig = plt.figure()
+        ax = fig.add_subplot(projection='3d')
+
+        ax.scatter(y[0], y[1], y[2])
+
+        plt.show()

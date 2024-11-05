@@ -34,7 +34,7 @@ libsgtsne.tsnepi_c.restype = c_double_p
 
 def _sgtsnepi_c(
         input_graph, y0=None, d=2, max_iter=1000, early_exag=250, lambda_par=1,
-        np=0, h=1.0, bb=-1.0, eta=200.0, run_exact=False, fftw_single=False,
+        num_proc=0, h=1.0, bb=-1.0, eta=200.0, run_exact=False, fftw_single=False,
         alpha=12, profile=False, drop_leaf=False,
         list_grid_sizes = [nextprod((2, 3, 5), x) for x in range(16,512)],
         grid_threshold=None
@@ -60,7 +60,7 @@ def _sgtsnepi_c(
     ptr_vals = input_graph.data.ctypes.data_as(c_double_p)
 
     # Create y0 pointer
-    ptr_y0 = None if y0 is None else y0.ctypes.data_as(c_double_p)
+    ptr_y0 = None if y0 is None else y0.T.ctypes.data_as(c_double_p)
 
     # Setting parameters correctly
     if grid_threshold is None:
@@ -85,11 +85,11 @@ def _sgtsnepi_c(
         alpha, fftw_single, h, bb, eta,
         list_grid_sizes, list_grid_sizes_len,
         n, drop_leaf, run_exact,
-        grid_threshold, np
+        grid_threshold, num_proc
     )
 
     # Extract the data from the c_double pointer to a numpy array
-    y = numpy.ctypeslib.as_array(ptr_y, shape=(d, n))
+    y = numpy.ctypeslib.as_array(ptr_y, shape=(n, d)).T
 
     if profile:
         return y, time_info
