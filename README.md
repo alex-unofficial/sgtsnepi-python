@@ -24,10 +24,11 @@ in the original repository where I am using the `julia-python-packages` branch.
 ## Running the Demo
 from the source directory run
 ```
-python -m tests.demo mm_file.mtx
+python -m tests.demo mm_file.mtx d
 ```
 where `mm_file.mtx` is a file containing the input matrix which is in the
-[Matrix Market](https://math.nist.gov/MatrixMarket/index.html) file format
+[Matrix Market](https://math.nist.gov/MatrixMarket/index.html) file format,
+and `d` is the number of embedding dimensions.
 
 ## Citation
 

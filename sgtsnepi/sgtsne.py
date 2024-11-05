@@ -8,6 +8,8 @@ from math import inf
 import numpy
 import numpy.ctypeslib
 
+from scipy.sparse import csc_matrix
+
 from nextprod import nextprod
 
 
@@ -30,6 +32,48 @@ libsgtsne.tsnepi_c.argtypes = [
     c_int, c_int
 ]
 libsgtsne.tsnepi_c.restype = c_double_p
+
+
+def sgtsnepi(
+        input_graph, y0=None, d=2, max_iter=1000, early_exag=250, lambda_par=1,
+        num_proc=0, h=1.0, bb=-1.0, eta=200.0, run_exact=False, fftw_single=False,
+        alpha=12, profile=False, drop_leaf=False,
+        list_grid_sizes = [nextprod((2, 3, 5), x) for x in range(16,512)],
+        grid_threshold=None
+    ):
+
+    # Import input_graph as CSC matrix
+    try:
+        input_graph = csc_matrix(input_graph)
+    except ValueError as e:
+        raise TypeError("input_graph must be an adjacency matrix") from e
+
+    if not input_graph.shape[0] == input_graph.shape[1]:
+        raise ValueError("input_graph must be symmetric")
+
+    n = input_graph.shape[0]
+
+    # Eliminate self-loops for input_matrix
+    if any(input_graph.diagonal() != 0):
+        print("Warning: input_graph has self-loops; setting distances to 0")
+    input_graph.setdiag(numpy.zeros(n))
+    input_graph.eliminate_zeros()
+
+    if numpy.min(input_graph.data) < 0:
+        raise ValueError("Negative edge weights are not supported")
+
+    if y0 is not None:
+        try:
+            y0 = numpy.array(y0)
+        except:
+            raise TypeError("y0 must be array-like or None.") from e
+
+        if y0.shape != (d, n):
+            raise ValueError("y0 must be of shape (d, n)")
+
+    return _sgtsnepi_c(input_graph, y0, d, max_iter, early_exag, lambda_par,
+                       num_proc, h, bb, eta, run_exact, fftw_single, alpha,
+                       profile, drop_leaf, list_grid_sizes, grid_threshold)
 
 
 def _sgtsnepi_c(
