@@ -7,6 +7,8 @@ a d-dimensional space (d=1,2,3) on a shared-memory computer.
 
 > :warning: **Warning!** This repository is still a work in progress and is not ready for general use.
 
+## Installation
+
 ### Prerequisites
 
 SG-t-SNE-Π uses the following open-source software:
@@ -31,7 +33,7 @@ On macOS:
 brew install flann tbb metis fftw lz4 doxygen
 ```
 
-## Installation
+### Installing the Module
 
 As of this point in the development it is recommended to work inside of a
 `Python` [virtual environment](https://docs.python.org/3/library/venv.html)
