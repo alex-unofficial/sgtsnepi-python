@@ -20,17 +20,23 @@ class CustomBuildExt(build_ext):
                 'libsgtsnepi'
             ])
 
-        # Set CXX enviromental variable
-        env = os.environ.copy()
-
         # Build the sgtsnepi library
         os.chdir('libsgtsnepi')
-        subprocess.check_call(['meson', 'setup', '--reconfigure', 'build'], env=env)
-        subprocess.check_call(['meson', 'compile', '-C', 'build'], env=env)
+        subprocess.check_call(
+            ['meson', 'setup', '--reconfigure', 'build'],
+            env=os.environ.copy()
+        )
+        subprocess.check_call(
+            ['meson', 'compile', '-C', 'build'],
+            env=os.environ.copy()
+        )
         os.chdir('..')
 
         # Ensure the directory structure in the build directory
-        os.makedirs(os.path.join(self.build_lib, 'sgtsnepi', 'lib'), exist_ok=True)
+        os.makedirs(
+            os.path.join(self.build_lib, 'sgtsnepi', 'lib'),
+            exist_ok=True
+        )
 
         # Move the compiled shared library to the sgtsnepi/lib directory
         shutil.copy(

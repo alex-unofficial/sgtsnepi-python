@@ -41,12 +41,12 @@ libsgtsne.tsnepi_c.restype = c_double_p
 
 
 def sgtsnepi(
-        input_graph, y0=None, d=2, max_iter=1000, early_exag=250, lambda_par=1,
-        num_proc=0, h=1.0, bb=-1.0, eta=200.0, run_exact=False, fftw_single=False,
-        alpha=12, profile=False, drop_leaf=False,
-        list_grid_sizes = [nextprod((2, 3, 5), x) for x in range(16,512)],
-        grid_threshold=None
-    ):
+    input_graph, y0=None, d=2, max_iter=1000, early_exag=250,
+    lambda_par=1, num_proc=0, h=1.0, bb=-1.0, eta=200.0, run_exact=False,
+    fftw_single=False, alpha=12, profile=False, drop_leaf=False,
+    list_grid_sizes=[nextprod((2, 3, 5), x) for x in range(16, 512)],
+    grid_threshold=None
+):
 
     # Import input_graph as CSC matrix
     try:
@@ -71,7 +71,7 @@ def sgtsnepi(
     if y0 is not None:
         try:
             y0 = numpy.array(y0)
-        except:
+        except Exception as e:
             raise TypeError("y0 must be array-like or None.") from e
 
         if y0.shape != (d, n):
@@ -83,12 +83,12 @@ def sgtsnepi(
 
 
 def _sgtsnepi_c(
-        input_graph, y0=None, d=2, max_iter=1000, early_exag=250, lambda_par=1,
-        num_proc=0, h=1.0, bb=-1.0, eta=200.0, run_exact=False, fftw_single=False,
-        alpha=12, profile=False, drop_leaf=False,
-        list_grid_sizes = [nextprod((2, 3, 5), x) for x in range(16,512)],
-        grid_threshold=None
-    ):
+    input_graph, y0=None, d=2, max_iter=1000, early_exag=250,
+    lambda_par=1, num_proc=0, h=1.0, bb=-1.0, eta=200.0, run_exact=False,
+    fftw_single=False, alpha=12, profile=False, drop_leaf=False,
+    list_grid_sizes=[nextprod((2, 3, 5), x) for x in range(16, 512)],
+    grid_threshold=None
+):
 
     # Assign memory for profile information buffers
     time_info = ((c_double * 6) * max_iter)()
