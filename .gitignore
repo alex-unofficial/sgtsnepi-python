@@ -1,2 +1,23 @@
+# Python-related files
 __pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Build artifacts
+dist/
+build/
+*.egg-info/
+
+# Third-party library directory
+libsgtsnepi/
+
+# Data files
 data/*.mtx
+
+# Environment-related files
+.env
+*.env
+*.venv
+.venv/
+

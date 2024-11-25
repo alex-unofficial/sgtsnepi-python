@@ -1,9 +1,11 @@
-from ctypes import CDLL
-from ctypes.util import find_library
+import os
 
+from ctypes import CDLL
 from ctypes import c_int, c_double, c_uint32, POINTER
 
 from math import inf
+
+import pkg_resources
 
 import numpy
 import numpy.ctypeslib
@@ -19,8 +21,12 @@ c_uint32_p = POINTER(c_uint32)
 c_double_p = POINTER(c_double)
 c_double_pp = POINTER(c_double_p)
 
+# Correctly set LD_LIBRARY_PATH
+package_dir = pkg_resources.resource_filename('sgtsnepi', 'lib')
+os.environ['LD_LIBRARY_PATH'] = package_dir
+
 # Importing tsnepi_c from the compiled shared object library
-libsgtsne = CDLL(find_library('sgtsnepi'))
+libsgtsne = CDLL(os.path.join(package_dir, 'libsgtsnepi.so.0'))
 
 libsgtsne.tsnepi_c.argtypes = [
     c_double_pp, c_double_p,

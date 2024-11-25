@@ -12,23 +12,43 @@ a d-dimensional space (d=1,2,3) on a shared-memory computer.
 As of this point in the development it is recommended to work inside of a
 `Python` [virtual environment](https://docs.python.org/3/library/venv.html)
 
-To install the required packages run
+To install the package run
 ```sh
-pip install -r requirements.txt
+pip install git+ssh://git@github.com:alex-unofficial/sgtsnepi-python.git
 ```
 
-To use the wrappers you must have the `sgtsnepi` library installed locally on your system. 
-You can find the [source code](https://github.com/fcdimitr/sgtsnepi/tree/julia-python-packages)
-in the original repository where I am using the `julia-python-packages` branch.
+Then in your Python code run the following to import the library:
+```python
+import sgtsnepi
+
+# [ ... ]
+
+sgtsnepi.sgtsnepi(sparse_matrix, args)
+```
+
+Or to import the `sgtsnepi` function directly:
+```python
+from sgtsnepi import sgtsnepi
+
+# [ ... ]
+
+sgtsnepi(sparse_matrix, args)
+```
 
 ## Running the Demo
-from the source directory run
+
+To use the demo you should install [matplotlib](https://matplotlib.org/) by running
+```sh
+pip install matplotlib
 ```
-python -m tests.demo mm_file.mtx d
+
+Then from the source directory run
+```
+python tests/demo.py mm_file.mtx ndim
 ```
 where `mm_file.mtx` is a file containing the input matrix which is in the
 [Matrix Market](https://math.nist.gov/MatrixMarket/index.html) file format,
-and `d` is the number of embedding dimensions.
+and `ndim` is the number of embedding dimensions.
 
 ## Citation
 

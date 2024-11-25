@@ -5,7 +5,6 @@ from scipy.sparse import csc_matrix
 
 import matplotlib.pyplot as plt
 
-from .context import sgtsnepi
 from sgtsnepi import sgtsnepi
 
 if __name__ == '__main__':
