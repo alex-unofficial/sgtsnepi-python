@@ -14,7 +14,7 @@ As of this point in the development it is recommended to work inside of a
 
 To install the package run
 ```sh
-pip install git+ssh://git@github.com:alex-unofficial/sgtsnepi-python.git
+pip install git+https://github.com/alex-unofficial/sgtsnepi-python.git
 ```
 
 Then in your Python code run the following to import the library:
