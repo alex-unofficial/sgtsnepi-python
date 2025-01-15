@@ -23,7 +23,7 @@ class CustomBuildExt(build_ext):
         # Build the sgtsnepi library
         os.chdir('libsgtsnepi')
         subprocess.check_call(
-            ['meson', 'setup', '--reconfigure', 'build'],
+            ['meson', 'setup', '--reconfigure', 'build',     '-Dfftw_parallel_lib=none',],
             env=os.environ.copy()
         )
         subprocess.check_call(
