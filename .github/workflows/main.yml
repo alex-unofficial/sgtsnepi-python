@@ -1,0 +1,78 @@
+name: Build and Test
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: [3.8, 3.9, 3.10, 3.11]
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          # Install dependencies needed by SG-t-SNE-Π
+          # Add 'ninja-build' because Ubuntu calls it 'ninja-build' not 'ninja'
+          sudo apt-get install -y \
+            meson \
+            ninja-build \
+            libtbb-dev \
+            libflann-dev \
+            libmetis-dev \
+            libfftw3-dev \
+            liblz4-dev \
+            doxygen
+
+      - name: Upgrade pip
+        run: python -m pip install --upgrade pip
+
+      - name: Install Python dependencies
+        run: |
+          # Install this package in editable mode, plus "dev" extras (for flake8, etc.)
+          python -m pip install .[dev]
+
+      - name: Lint with flake8
+        run: |
+          flake8 .
+
+      # (Optional) Lint with pylint as well, if desired:
+      # - name: Lint with pylint
+      #   run: |
+      #     pylint sgtsnepi
+
+      - name: Build the wheel
+        run: |
+          # This will run your CustomBuild classes in setup.py
+          # and produce a wheel in dist/
+          python -m build --wheel --no-isolation
+
+      - name: Smoke Test
+        run: |
+          # Create a small 4x4 symmetric matrix in the MatrixMarket format
+          echo "%MatrixMarket matrix coordinate real symmetric" > test.mtx
+          echo "4 4 4" >> test.mtx
+          echo "1 2 1.0" >> test.mtx
+          echo "2 3 2.0" >> test.mtx
+          echo "3 4 3.0" >> test.mtx
+          echo "4 1 4.0" >> test.mtx
+
+          # Run the demo in 2D just to ensure there's no crash
+          python tests/demo.py test.mtx 2
+
+          echo "Test completed successfully!"
