@@ -36,6 +36,8 @@ jobs:
             libflann-dev \
             libmetis-dev \
             libfftw3-dev \
+            libfftw3-mpi-dev \
+            libfftw3-openmp-dev \
             liblz4-dev \
             doxygen
 
