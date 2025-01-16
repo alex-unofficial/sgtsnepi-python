@@ -61,7 +61,7 @@ jobs:
         run: |
           # This will run your CustomBuild classes in setup.py
           # and produce a wheel in dist/
-          python -m build --wheel --no-isolation
+          python -m pip install --upgrade build && python -m build --wheel --no-isolation
 
       - name: Smoke Test
         run: |
