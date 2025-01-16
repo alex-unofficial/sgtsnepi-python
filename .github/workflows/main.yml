@@ -72,9 +72,15 @@ jobs:
           #e#cho "2 3 2.0" >> test.mtx
           #echo "3 4 3.0" >> test.mtx
           #echo "4 1 4.0" >> test.mtx
+          echo "%%MatrixMarket matrix coordinate real symmetric" > test.mtx
+          echo "4 4 4" >> test.mtx
+          echo "1 2 1.0" >> test.mtx
+          echo "2 3 2.0" >> test.mtx
+          echo "3 4 3.0" >> test.mtx
+          echo "4 1 4.0" >> test.mtx
 
           # Run the demo in 2D just to ensure there's no crash
-          #python tests/demo.py test.mtx 2
-          python tests/demo.py mm_file.mtx ndim
+          python tests/demo.py test.mtx 2
+          #python tests/demo.py mm_file.mtx ndim
 
           echo "Test completed successfully!"
