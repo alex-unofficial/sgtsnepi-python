@@ -127,6 +127,8 @@ def _sgtsnepi_c(
     list_grid_sizes_len = len(list_grid_sizes)
     list_grid_sizes = (c_int * list_grid_sizes_len)(*list_grid_sizes)
 
+    print("Entering into C...")
+
     # Running the C function
     ptr_y = libsgtsne.tsnepi_c(
         ptr_time_info, grid_sizes,
@@ -137,6 +139,8 @@ def _sgtsnepi_c(
         n, drop_leaf, run_exact,
         grid_threshold, num_proc
     )
+
+    print("Back to Python...")
 
     # Extract the data from the c_double pointer to a numpy array
     y = numpy.ctypeslib.as_array(ptr_y, shape=(n, d)).T
