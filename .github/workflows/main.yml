@@ -8,12 +8,14 @@ on:
 
 jobs:
   build-and-test:
-    runs-on: ubuntu-latest
-
+    # We'll run the same job on ubuntu-latest AND macos-latest
     strategy:
       fail-fast: false
       matrix:
+        os: [ubuntu-latest, macos-latest]
         python-version: [3.8]
+
+    runs-on: ${{ matrix.os }}
 
     steps:
       - name: Check out code
@@ -24,11 +26,12 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Install system dependencies
+      - name: Install system dependencies (Ubuntu)
+        # Only run this step if on ubuntu-latest
+        if: matrix.os == 'ubuntu-latest'
         run: |
           sudo apt-get update
-          # Install dependencies needed by SG-t-SNE-Π
-          # Add 'ninja-build' because Ubuntu calls it 'ninja-build' not 'ninja'
+          # apt names differ slightly from brew
           sudo apt-get install -y \
             meson \
             ninja-build \
@@ -40,38 +43,34 @@ jobs:
             liblz4-dev \
             doxygen
 
+      - name: Install system dependencies (macOS)
+        # Only run this step if on macos-latest
+        if: matrix.os == 'macos-latest'
+        run: |
+          brew update
+          # Install native libs for meson, ninja, TBB, FLANN, METIS, FFTW, LZ4, etc.
+          brew install meson ninja tbb flann metis fftw lz4 doxygen
+
       - name: Upgrade pip
         run: python -m pip install --upgrade pip
 
       - name: Install Python dependencies
         run: |
-          # Install this package in editable mode, plus "dev" extras (for flake8, etc.)
+          # Installs your package in editable mode plus dev extras (flake8, etc.)
           python -m pip install .[dev]
 
+      # Optional: Run lint checks here if desired
       # - name: Lint with flake8
-      #   run: |
-      #     flake8 .
-
-      # (Optional) Lint with pylint as well, if desired:
-      # - name: Lint with pylint
-      #   run: |
-      #     pylint sgtsnepi
+      #   run: flake8 .
 
       - name: Build the wheel
         run: |
-          # This will run your CustomBuild classes in setup.py
-          # and produce a wheel in dist/
-          python -m pip install --upgrade build	wheel meson ninja && python -m build --wheel --no-isolation
-          
+          python -m pip install --upgrade build wheel meson ninja
+          python -m build --wheel --no-isolation
+
       - name: Smoke Test
         run: |
-          # Create a small 4x4 symmetric matrix in the MatrixMarket format
-          #echo "%MatrixMarket matrix coordinate real symmetric" > test.mtx
-          #echo "4 4 4" >> test.mtx
-          #echo "1 2 1.0" >> test.mtx
-          #e#cho "2 3 2.0" >> test.mtx
-          #echo "3 4 3.0" >> test.mtx
-          #echo "4 1 4.0" >> test.mtx
+          # Create a small 4x4 symmetric matrix in MatrixMarket format
           echo "%%MatrixMarket matrix coordinate real symmetric" > test.mtx
           echo "4 4 4" >> test.mtx
           echo "1 2 1.0" >> test.mtx
@@ -79,8 +78,7 @@ jobs:
           echo "3 4 3.0" >> test.mtx
           echo "4 1 4.0" >> test.mtx
 
-          # Run the demo in 2D just to ensure there's no crash
+          # Run the minimal demo test
           python tests/demo.py test.mtx 2
-          #python tests/demo.py mm_file.mtx ndim
 
-          echo "Test completed successfully!"
+          echo "Test completed successfully on ${{ matrix.os }}!"
