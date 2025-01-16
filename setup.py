@@ -31,24 +31,26 @@ class CustomBuildExt(build_ext):
             env=os.environ.copy()
         )
         os.chdir('..')
-        # Determine the shared library file name by platform
-        if sys.platform.startswith('linux'):
-            lib_file = 'libsgtsnepi.so.0'
-        elif sys.platform == 'darwin':
-            lib_file = 'libsgtsnepi.0.dylib'
-        elif os.name == 'nt':
-            lib_file = 'libsgtsnepi.dll'
+       # Figure out the name produced by Meson
+        if sys.platform.startswith('darwin'):
+            built_lib_name = 'libsgtsnepi.0.dylib'
+            final_lib_name = 'libsgtsnepi.so.0'   # unify the name to .so.0
+        elif sys.platform.startswith('linux'):
+            built_lib_name = 'libsgtsnepi.so.0'
+            final_lib_name = 'libsgtsnepi.so.0'
         else:
-            # fallback, or raise an error if unrecognized
             raise RuntimeError(f"Unsupported platform: {sys.platform}")
-        
-        # Copy the compiled shared library into package dir
+
+        # Copy from what was built to our final uniform name
+        build_lib_dir = os.path.join('libsgtsnepi', 'build')
         os.makedirs(os.path.join(self.build_lib, 'sgtsnepi', 'lib'), exist_ok=True)
+
+        # If needed, rename or copy
         shutil.copy(
-            os.path.join('libsgtsnepi', 'build', lib_file),
-            os.path.join(self.build_lib, 'sgtsnepi', 'lib')
+            os.path.join(build_lib_dir, built_lib_name),
+            os.path.join(self.build_lib, 'sgtsnepi', 'lib', final_lib_name)
         )
-        # Continue with the standard build_ext steps
+
         super().run()
 
 class CustomBuild(build):
