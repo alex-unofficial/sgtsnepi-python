@@ -16,7 +16,7 @@ class CustomBuildExt(build_ext):
                 'git', 'clone',
                 '--branch', 'julia-python-packages',
                 '--depth', '1',
-                'https://github.com/alex-unofficial/sgtsnepi',
+                'https://github.com/fcdimitr/sgtsnepi',
                 'libsgtsnepi'
             ])
 
