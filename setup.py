@@ -14,7 +14,7 @@ class CustomBuildExt(build_ext):
         if not os.path.exists('libsgtsnepi'):
             subprocess.check_call([
                 'git', 'clone',
-                '--branch', 'julia-python-packages',
+                '--branch', 'debug',
                 '--depth', '1',
                 'https://github.com/alex-unofficial/sgtsnepi',
                 'libsgtsnepi'
