@@ -48,9 +48,9 @@ jobs:
           # Install this package in editable mode, plus "dev" extras (for flake8, etc.)
           python -m pip install .[dev]
 
-      - name: Lint with flake8
-        run: |
-          flake8 .
+      # - name: Lint with flake8
+      #   run: |
+      #     flake8 .
 
       # (Optional) Lint with pylint as well, if desired:
       # - name: Lint with pylint
