@@ -31,22 +31,25 @@ class CustomBuildExt(build_ext):
             env=os.environ.copy()
         )
         os.chdir('..')
-
-        # Ensure the directory structure in the build directory
-        os.makedirs(
-            os.path.join(self.build_lib, 'sgtsnepi', 'lib'),
-            exist_ok=True
-        )
-
-        # Move the compiled shared library to the sgtsnepi/lib directory
+        # Determine the shared library file name by platform
+        if sys.platform.startswith('linux'):
+            lib_file = 'libsgtsnepi.so.0'
+        elif sys.platform == 'darwin':
+            lib_file = 'libsgtsnepi.0.dylib'
+        elif os.name == 'nt':
+            lib_file = 'libsgtsnepi.dll'
+        else:
+            # fallback, or raise an error if unrecognized
+            raise RuntimeError(f"Unsupported platform: {sys.platform}")
+        
+        # Copy the compiled shared library into package dir
+        os.makedirs(os.path.join(self.build_lib, 'sgtsnepi', 'lib'), exist_ok=True)
         shutil.copy(
-            os.path.join('libsgtsnepi', 'build', 'libsgtsnepi.so.0'),
+            os.path.join('libsgtsnepi', 'build', lib_file),
             os.path.join(self.build_lib, 'sgtsnepi', 'lib')
         )
-
         # Continue with the standard build_ext steps
         super().run()
-
 
 class CustomBuild(build):
     def run(self):
