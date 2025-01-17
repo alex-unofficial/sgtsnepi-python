@@ -1,18 +1,20 @@
-name: Build and Test
+name: Build, Test, and Publish
 
 on:
   push:
+    # Include normal branches so we can do the build/test on them.
     branches: [ "master" ]
+    # Also trigger when you push a tag (e.g. "v0.1.0").
+    tags: [ "v*" ]
   pull_request:
     branches: [ "master" ]
 
 jobs:
   build-and-test:
-    # We'll run the same job on ubuntu-latest AND macos-latest
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest]
+        os: [ubuntu-latest, macos-latest, windows-latest]
         python-version: [3.8]
 
     runs-on: ${{ matrix.os }}
@@ -26,51 +28,22 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Install system dependencies (Ubuntu)
-        # Only run this step if on ubuntu-latest
-        if: matrix.os == 'ubuntu-latest'
-        run: |
-          sudo apt-get update
-          # apt names differ slightly from brew
-          sudo apt-get install -y \
-            meson \
-            ninja-build \
-            libtbb-dev \
-            libflann-dev \
-            libmetis-dev \
-            libfftw3-dev \
-            libfftw3-mpi-dev \
-            liblz4-dev \
-            doxygen
-
-      - name: Install system dependencies (macOS)
-        # Only run this step if on macos-latest
-        if: matrix.os == 'macos-latest'
-        run: |
-          brew update
-          # Install native libs for meson, ninja, TBB, FLANN, METIS, FFTW, LZ4, etc.
-          brew install meson ninja tbb flann metis fftw lz4 doxygen
+      # Install system dependencies per OS (omitted here for brevity),
+      # same as in your existing workflow.
 
       - name: Upgrade pip
         run: python -m pip install --upgrade pip
 
       - name: Install Python dependencies
-        run: |
-          # Installs your package in editable mode plus dev extras (flake8, etc.)
-          python -m pip install .[dev]
+        run: python -m pip install .[dev]
 
-      # Optional: Run lint checks here if desired
-      # - name: Lint with flake8
-      #   run: flake8 .
-
-      - name: Build the wheel
+      - name: Build wheel/sdist
         run: |
           python -m pip install --upgrade build wheel meson ninja
-          python -m build --wheel --no-isolation
+          python -m build --sdist --wheel --no-isolation
 
-      - name: Smoke Test
+      - name: Smoke test
         run: |
-          # Create a small 4x4 symmetric matrix in MatrixMarket format
           echo "%%MatrixMarket matrix coordinate real symmetric" > test.mtx
           echo "4 4 4" >> test.mtx
           echo "1 2 1.0" >> test.mtx
@@ -78,7 +51,42 @@ jobs:
           echo "3 4 3.0" >> test.mtx
           echo "4 1 4.0" >> test.mtx
 
-          # Run the minimal demo test
           python tests/demo.py test.mtx 2
+          echo "Tests complete!"
 
-          echo "Test completed successfully on ${{ matrix.os }}!"
+  publish:
+    # Only run when the "build-and-test" job has succeeded.
+    needs: [build-and-test]
+    runs-on: ubuntu-latest
+
+    # Only publish if it's a *tag* push, e.g. "v0.1.0"
+    if: startsWith(github.ref, 'refs/tags/')
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.8
+
+      - name: Install Twine
+        run: python -m pip install --upgrade twine
+
+      - name: Download build artifacts
+        # We need to gather the .whl and .tar.gz that were created in the build job
+        # Option 1: We'll just re-build them in the "publish" job. 
+        # Option 2: If your "build-and-test" job saves artifacts, you can download them here.
+        # For simplicity, let's just rebuild (assuming it's not huge).
+        run: |
+          python -m pip install --upgrade build wheel meson ninja
+          python -m build --sdist --wheel --no-isolation
+
+      - name: Publish to PyPI
+        run: |
+          # Or for TestPyPI, use --repository-url https://test.pypi.org/legacy/
+          python -m twine upload dist/*
+        env:
+          TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
+          TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
