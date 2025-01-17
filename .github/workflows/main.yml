@@ -29,7 +29,30 @@ jobs:
           python-version: ${{ matrix.python-version }}
 
       # Install system dependencies per OS (omitted here for brevity),
-      # same as in your existing workflow.
+      - name: Install system dependencies (Ubuntu)
+        # Only run this step if on ubuntu-latest
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          # apt names differ slightly from brew
+          sudo apt-get install -y \
+            meson \
+            ninja-build \
+            libtbb-dev \
+            libflann-dev \
+            libmetis-dev \
+            libfftw3-dev \
+            libfftw3-mpi-dev \
+            liblz4-dev \
+            doxygen
+            
+      - name: Install system dependencies (macOS)
+        # Only run this step if on macos-latest
+        if: matrix.os == 'macos-latest'
+        run: |
+          brew update
+          # Install native libs for meson, ninja, TBB, FLANN, METIS, FFTW, LZ4, etc.
+          brew install meson ninja tbb flann metis fftw lz4 doxygen # same as in your existing workflow.
 
       - name: Upgrade pip
         run: python -m pip install --upgrade pip
