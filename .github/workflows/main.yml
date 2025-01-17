@@ -83,7 +83,7 @@ jobs:
     runs-on: ubuntu-latest
 
     # Only publish if it's a *tag* push, e.g. "v0.1.0"
-    if: startsWith(github.ref, 'refs/tags/')
+    #if: startsWith(github.ref, 'refs/tags/')
 
     steps:
       - name: Check out code
@@ -108,8 +108,8 @@ jobs:
 
       - name: Publish to PyPI
         run: |
-          # Or for TestPyPI, use --repository-url https://test.pypi.org/legacy/
-          python -m twine upload dist/*
+          # Or for TestPyPI, use 
+          python -m twine upload dist/* --repository-url https://test.pypi.org/legacy/
         env:
           TWINE_USERNAME: ${{ secrets.TEST_PYPI_USERNAME }}
           TWINE_PASSWORD: ${{ secrets.TEST_PYPI_PASSWORD }}
