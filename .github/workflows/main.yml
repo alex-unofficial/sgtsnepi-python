@@ -14,7 +14,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest]#, macos-latest, windows-latest]
+        os: [ubuntu-latest, macos-latest]#, windows-latest]
         python-version: [3.8]
 
     runs-on: ${{ matrix.os }}
@@ -117,12 +117,12 @@ jobs:
           path: dist
           if-no-files-found: ignore
 
-      - name: Download artifacts from Windows
-        uses: actions/download-artifact@v3
-        with:
-          name: dist-windows-latest
-          path: dist
-          if-no-files-found: ignore
+      #- name: Download artifacts from Windows
+      #  uses: actions/download-artifact@v3
+      #  with:
+      #    name: dist-windows-latest
+      #    path: dist
+      #    if-no-files-found: ignore
 
       - name: Publish to PyPI
         run: |
