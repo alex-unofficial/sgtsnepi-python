@@ -55,13 +55,14 @@ def sgtsnepi(
         raise TypeError("input_graph must be an adjacency matrix") from e
 
     if not input_graph.shape[0] == input_graph.shape[1]:
-        raise ValueError("input_graph must be symmetric")
+        raise ValueError("input_graph must be square")
 
     n = input_graph.shape[0]
 
     # Eliminate self-loops for input_matrix
     if any(input_graph.diagonal() != 0):
         print("Warning: input_graph has self-loops; setting distances to 0")
+
     input_graph.setdiag(numpy.zeros(n))
     input_graph.eliminate_zeros()
 
