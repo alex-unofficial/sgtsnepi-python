@@ -30,13 +30,22 @@ py::array_t<double, py::array::c_style> _sgtsnepi_c(
 
 		py::array_t<double, py::array::c_style> y({n,d});
 
+
+		// numpy.array(None) is (for some reason) translated
+		// as NaN in C++ with pybind11. see the github issue
+		// https://github.com/pybind/pybind11/issues/1953
+		double *y_in_ptr = NULL;
+		if (!isnan(y_in.data()[0])) {
+			y_in_ptr = y_in.mutable_data();
+		}
+
 		double *res = tsnepi_c(
 				NULL, // time info, used for profiling
 				NULL, // grid sizes, used for profiling
 				rows.data(),
 				cols.data(),
 				vals.data(),
-				y_in.mutable_data(),
+				y_in_ptr,
 				nnz,
 				d,
 				lambda_par,
