@@ -60,7 +60,7 @@ def sgtsnepi(
     h = 1.0 if h == 0 else h
     h = [max_iter + 1, h]
 
-    return _sgtsnepi_c(
+    y = _sgtsnepi_c(
         numpy.array(input_graph.indices, dtype=numpy.uint32),
         numpy.array(input_graph.indptr, dtype=numpy.uint32),
         numpy.array(input_graph.data, dtype=numpy.float64),
@@ -82,4 +82,12 @@ def sgtsnepi(
         run_exact,
         grid_threshold
     )
+
+    # reshape y to (n, d)
+    y = y.reshape((n, d))
+
+    # permute y to (d, n)
+    y = numpy.transpose(y)
+
+    return y
 
