@@ -28,8 +28,7 @@ py::array_t<double, py::array::c_style> _sgtsnepi_c(
 			 int grid_threshold
 		) {
 
-		py::array_t<double, py::array::c_style> y({n,d});
-
+		py::array_t<double, py::array::c_style> y({d,n});
 
 		// numpy.array(None) is (for some reason) translated
 		// as NaN in C++ with pybind11. see the github issue
