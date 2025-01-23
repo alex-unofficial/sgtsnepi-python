@@ -5,11 +5,6 @@
 
 namespace py = pybind11;
 
-std::vector<double> GLOBAL_GRID_SIZES;
-int N_GRID_SIZE = 0;
-int *listGridSize = NULL;
-int GRID_SIZE_THRESHOLD = 0;
-
 py::array_t<double, py::array::c_style> _sgtsnepi_c(
 			 py::array_t<uint32_t, py::array::c_style> rows,
 			 py::array_t<uint32_t, py::array::c_style> cols,
@@ -22,9 +17,11 @@ py::array_t<double, py::array::c_style> _sgtsnepi_c(
 			 int early_exag,
 			 int alpha,
 			 bool fftw_single,
-			 py::array_t<double> h,
+			 py::array_t<double, py::array::c_style> h,
 			 double bb,
 			 double eta,
+			 py::array_t<int32_t, py::array::c_style> list_grid_sizes,
+			 int n_grid_sizes,
 			 int n,
 			 bool drop_leaf,
 			 bool run_exact,
@@ -50,8 +47,8 @@ py::array_t<double, py::array::c_style> _sgtsnepi_c(
 				h.mutable_data(),
 				bb,
 				eta,
-				NULL,
-				0,
+				list_grid_sizes.data(),
+				n_grid_sizes,
 				n,
 				drop_leaf,
 				run_exact,

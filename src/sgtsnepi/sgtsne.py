@@ -47,6 +47,8 @@ def sgtsnepi(
             raise ValueError("y0 must be of shape (d, n)")
 
     # Setting parameters correctly
+    list_grid_sizes=[nextprod((2, 3, 5), x) for x in range(16, 512)]
+
     if grid_threshold is None:
         grid_threshold = 1e6 ** (1/d)
 
@@ -73,6 +75,8 @@ def sgtsnepi(
         numpy.array(h, dtype=numpy.float64),
         bb,
         eta,
+        numpy.array(list_grid_sizes, dtype=numpy.int32),
+        len(list_grid_sizes),
         n,
         drop_leaf,
         run_exact,
