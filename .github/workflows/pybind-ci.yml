@@ -60,6 +60,8 @@ jobs:
       - name: Build manylinux wheels
         env:
           CIBW_BEFORE_BUILD: |
+           python -m pip install --upgrade pip 
+           python -m pip install meson ninja
            mkdir -p external &&
            cd external &&
            git clone --branch julia-python-packages --depth 1 https://github.com/fcdimitr/sgtsnepi &&
