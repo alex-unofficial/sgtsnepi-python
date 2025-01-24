@@ -83,9 +83,6 @@ def sgtsnepi(
         grid_threshold
     )
 
-    # reshape y to (n, d)
-    y = y.reshape((n, d))
-
     # permute y to (d, n)
     y = numpy.transpose(y)
 
