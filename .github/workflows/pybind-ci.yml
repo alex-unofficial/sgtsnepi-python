@@ -37,7 +37,14 @@ jobs:
             libfftw3-mpi-dev \
             liblz4-dev \
             doxygen       
-
+            
+      - name: Build library
+        run:  mkdir external && cd external 
+              git clone --branch julia-python-packages --depth 1 https://github.com/fcdimitr/sgtsnepi && cd sgtsnepi
+              meson setup build && meson compile -C build
+              cd ../..
+              pip install .
+              
       - name: Install build tools
         run: |
           # scikit-build-core includes scikit-build, pybind11 is for any pybind code, 
