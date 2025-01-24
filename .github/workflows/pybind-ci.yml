@@ -39,7 +39,8 @@ jobs:
             doxygen       
             
       - name: Build library
-        run:  mkdir external && cd external 
+        run:  |
+              mkdir external && cd external 
               git clone --branch julia-python-packages --depth 1 https://github.com/fcdimitr/sgtsnepi && cd sgtsnepi
               meson setup build && meson compile -C build
               cd ../..
