@@ -79,9 +79,6 @@ jobs:
           # it finds inside the manylinux Docker images.
           cibuildwheel --platform linux --output-dir dist
           
-      - name: Build manylinux wheels
-        run: cibuildwheel --output-dir dist
-
       - name: Show built wheels
         run: ls -l dist
 
