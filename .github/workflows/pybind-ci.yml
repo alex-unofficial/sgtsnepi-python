@@ -17,17 +17,34 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: 3.11  # or whichever Python you want
+          python-version: 3.8  # or whichever Python you want
 
-      - name: Upgrade pip
-        run: python -m pip install --upgrade pip
+
+      # Install system dependencies per OS (omitted here for brevity),
+      - name: Install system dependencies (Ubuntu)
+        # Only run this step if on ubuntu-latest
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          # apt names differ slightly from brew
+          sudo apt-get install -y \
+            meson \
+            ninja-build \
+            libtbb-dev \
+            libflann-dev \
+            libmetis-dev \
+            libfftw3-dev \
+            libfftw3-mpi-dev \
+            liblz4-dev \
+            doxygen       
 
       - name: Install build tools
         run: |
           # scikit-build-core includes scikit-build, pybind11 is for any pybind code, 
           # and 'build' is the CLI tool `python -m build`
-          python -m pip install --upgrade build scikit-build-core pybind11
-
+             python -m pip install --upgrade pip
+             python -m pip install --upgrade build scikit-build-core pybind11 ninja
+             
       - name: Build the wheel
         run: |
           python -m build --wheel --no-isolation
