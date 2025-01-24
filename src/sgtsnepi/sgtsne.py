@@ -7,10 +7,11 @@ from nextprod import nextprod
 
 from ._sgtsnepi_ import _sgtsnepi_c
 
+
 def sgtsnepi(
     input_graph, y0=None, d=2, max_iter=1000, early_exag=250,
-    lambda_par=1, num_proc=0, h=1.0, bb=-1.0, eta=200.0, run_exact=False,
-    fftw_single=False, alpha=12, profile=False, drop_leaf=False,
+    lambda_par=1, h=1.0, bb=-1.0, eta=200.0, run_exact=False,
+    fftw_single=False, alpha=12, drop_leaf=False,
     grid_threshold=None
 ):
 
@@ -47,7 +48,7 @@ def sgtsnepi(
             raise ValueError("y0 must be of shape (d, n)")
 
     # Setting parameters correctly
-    list_grid_sizes=[nextprod((2, 3, 5), x) for x in range(16, 512)]
+    list_grid_sizes = [nextprod((2, 3, 5), x) for x in range(16, 512)]
 
     if grid_threshold is None:
         grid_threshold = 1e6 ** (1/d)
@@ -87,4 +88,3 @@ def sgtsnepi(
     y = numpy.transpose(y)
 
     return y
-
