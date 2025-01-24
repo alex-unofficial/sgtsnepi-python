@@ -23,7 +23,7 @@ jobs:
       # Install system dependencies per OS (omitted here for brevity),
       - name: Install system dependencies (Ubuntu)
         # Only run this step if on ubuntu-latest
-        if: matrix.os == 'ubuntu-latest'
+        # if: matrix.os == 'ubuntu-latest'
         run: |
           sudo apt-get update
           # apt names differ slightly from brew
