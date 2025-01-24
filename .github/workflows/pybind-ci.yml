@@ -57,33 +57,31 @@ jobs:
         run: |
           python -m pip install cibuildwheel
 
+     
       - name: Build manylinux wheels
         env:
-          CIBW_ARCHS_LINUX: "x86_64"
-          CIBW_SKIP: "musllinux*"
-          CIBW_MANYLINUX_X86_64_IMAGE: "quay.io/pypa/manylinux2014_x86_64:latest"
-          CIBW_BUILD: "cp38-* cp39-* cp310-* cp311-*"
-          CIBW_BEFORE_BUILD: |
-           # install FFTW dev headers; add any others you need: metis, lz4, etc.
-           yum install -y fftw-devel lz4-devel tbb-devel flann-devel metis-devel
-           python -m pip install --upgrade pip 
-           python -m pip install meson ninja
-           mkdir -p external &&
-           cd external &&
-           rm -rf sgtsnepi/
-           git clone --branch julia-python-packages --depth 1 https://github.com/fcdimitr/sgtsnepi &&
-           cd sgtsnepi &&
-           meson setup build &&
-           meson compile -C build &&
-           cd ../..
-          #CIBW_MANYLINUX_X86_64_IMAGE: quay.io/pypa/manylinux2014_x86_64:latest
-          #CIBW_MUSLLINUX_X86_64_IMAGE: quay.io/pypa/musllinux_1_2_x86_64:latest
-          #CIBW_BUILD: "cp37-* cp38-* cp39-* cp310-* cp311-*"
-          #CIBW_PLATFORM: linux
-        run: |
-          # cibuildwheel by default builds wheels for all Python 3 versions
-          # it finds inside the manylinux Docker images.
-          cibuildwheel --output-dir dist
+           CIBW_PLATFORM: "linux"
+           # Only 64-bit
+           CIBW_ARCHS_LINUX: "x86_64"
+           # Build only CPython 3.8 - 3.11
+           CIBW_BUILD: "cp38-* cp39-* cp310-* cp311-*"
+           # Use manylinux2014:latest image to avoid invalid date-based tags
+           CIBW_MANYLINUX_X86_64_IMAGE: "quay.io/pypa/manylinux2014_x86_64:latest"
+           # SKIP musllinux by matching the pattern "*-musllinux_*"
+           CIBW_SKIP: "*-musllinux_*"
+           CIBW_BEFORE_BUILD: |
+             yum install -y fftw-devel lz4-devel tbb-devel flann-devel metis-devel
+             python -m pip install --upgrade pip
+             python -m pip install meson ninja
+             mkdir -p external &&
+             cd external &&
+             rm -rf sgtsnepi/
+             git clone --branch julia-python-packages --depth=1 https://github.com/fcdimitr/sgtsnepi &&
+             cd sgtsnepi &&
+             meson setup build &&
+             meson compile -C build &&
+             cd ../..
+        run: cibuildwheel --output-dir dist
           
       - name: Show built wheels
         run: ls -l dist
