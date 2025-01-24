@@ -60,6 +60,8 @@ jobs:
       - name: Build manylinux wheels
         env:
           CIBW_BEFORE_BUILD: |
+           # install FFTW dev headers; add any others you need: metis, lz4, etc.
+           yum install -y fftw-devel lz4-devel tbb-devel flann-devel metis-devel
            python -m pip install --upgrade pip 
            python -m pip install meson ninja
            mkdir -p external &&
