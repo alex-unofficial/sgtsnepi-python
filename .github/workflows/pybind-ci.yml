@@ -66,6 +66,7 @@ jobs:
            python -m pip install meson ninja
            mkdir -p external &&
            cd external &&
+           rm -rf sgtsnepi/
            git clone --branch julia-python-packages --depth 1 https://github.com/fcdimitr/sgtsnepi &&
            cd sgtsnepi &&
            meson setup build &&
