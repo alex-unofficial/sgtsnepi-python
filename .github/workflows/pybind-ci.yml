@@ -58,10 +58,16 @@ jobs:
           python -m pip install cibuildwheel
 
       - name: Build manylinux wheels
+        env:
+         CIBW_BUILD: "cp37-* cp38-* cp39-* cp310-* cp311-*"
+         CIBW_PLATFORM: linux
         run: |
           # cibuildwheel by default builds wheels for all Python 3 versions
           # it finds inside the manylinux Docker images.
           cibuildwheel --platform linux --output-dir dist
+          - name: Build manylinux wheels
+  
+  run: cibuildwheel --output-dir dist
 
       - name: Show built wheels
         run: ls -l dist
