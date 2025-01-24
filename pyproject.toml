@@ -40,26 +40,7 @@ dev = [
 
 [build-system]
 requires = [
-    "scikit-build-core[meson]>=0.5.0",
-    "pybind11",
-    "wheel"
+    "scikit-build-core>=0.5.0",
+    "pybind11"
     ]
 build-backend = "scikit_build_core.build"
-
-[tool.scikit-build-core]
-builder = "meson"
-
-[tool.scikit-build-core.scripts]
-# "pre-build" commands are run BEFORE Meson is invoked.
-pre-build = [
-  "mkdir -p external",
-  "cd external",
-  # clone the external repo
-  "git clone --branch julia-python-packages --depth=1 https://github.com/fcdimitr/sgtsnepi",
-  # build it with Meson
-  "cd sgtsnepi",
-  "meson setup build",
-  "meson compile -C build",
-  # return to root
-  "cd ../.."
-]
