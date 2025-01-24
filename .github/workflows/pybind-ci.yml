@@ -59,8 +59,16 @@ jobs:
 
       - name: Build manylinux wheels
         env:
-         CIBW_BUILD: "cp37-* cp38-* cp39-* cp310-* cp311-*"
-         CIBW_PLATFORM: linux
+          CIBW_BEFORE_BUILD: |
+           mkdir -p external &&
+           cd external &&
+           git clone --branch julia-python-packages --depth 1 https://github.com/fcdimitr/sgtsnepi &&
+           cd sgtsnepi &&
+           meson setup build &&
+           meson compile -C build &&
+           cd ../..
+          CIBW_BUILD: "cp37-* cp38-* cp39-* cp310-* cp311-*"
+          CIBW_PLATFORM: linux
         run: |
           # cibuildwheel by default builds wheels for all Python 3 versions
           # it finds inside the manylinux Docker images.
