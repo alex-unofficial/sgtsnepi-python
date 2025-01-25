@@ -11,7 +11,11 @@ project(
 if host_machine.system() == 'windows'
     add_project_arguments(
         '-Dcmake_toolchain_file=D:\\a\\sgtsnepi-python\\sgtsnepi-python\\vcpkg\\scripts\\buildsystems\\vcpkg.cmake',
-        '--vsenv'
+        language: 'cpp'
+    )
+    add_project_arguments(
+        '-Dcmake_toolchain_file=D:\\a\\sgtsnepi-python\\sgtsnepi-python\\vcpkg\\scripts\\buildsystems\\vcpkg.cmake',
+        language: 'c'
     )
 endif
 
