@@ -20,7 +20,7 @@ jobs:
         with:
           # You can also do a matrix of Python versions, but typically
           # cibuildwheel itself will handle multiple Python versions inside Docker (on Linux).
-          python-version: 3.9
+          python-version: 3.11
 
       - name: Upgrade pip & install cibuildwheel
         run: |
