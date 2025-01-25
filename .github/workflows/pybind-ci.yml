@@ -28,9 +28,9 @@ jobs:
           python -m pip install cibuildwheel twine
 
       - name: Install Rtools (Windows)
-          # Rtools provides pkg-config on Windows
-          if: ${{ runner.os == 'Windows' }}
-          run: |
+        # Rtools provides pkg-config on Windows
+        if: ${{ runner.os == 'Windows' }}
+        run: |
             choco install rtools -y --no-progress --force --version=4.0.0.20220206
             echo "c:\rtools40\ucrt64\bin;" >> $env:GITHUB_PATH
  
