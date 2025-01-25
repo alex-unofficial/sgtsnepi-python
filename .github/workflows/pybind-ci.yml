@@ -1,95 +1,77 @@
-name: Build (Linux Only)
-
+name: Build Wheels (Linux + macOS)
 on:
   push:
     branches: [ "pybind" ]
   pull_request:
     branches: [ "pybind" ]
-
 jobs:
-  build-linux-wheel:
-    runs-on: ubuntu-latest
-    
+  build-wheels:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
     steps:
       - name: Check out code
         uses: actions/checkout@v3
-
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: 3.8  # or whichever Python you want
-
-
-      # Install system dependencies per OS (omitted here for brevity),
-      - name: Install system dependencies (Ubuntu)
-        # Only run this step if on ubuntu-latest
-        # if: matrix.os == 'ubuntu-latest'
+          # You can also do a matrix of Python versions, but typically
+          # cibuildwheel itself will handle multiple Python versions inside Docker (on Linux).
+          python-version: 3.8
+      - name: Upgrade pip & install cibuildwheel
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install cibuildwheel
+      # ------------------------------------------
+      # OS-Specific System Dependencies
+      # ------------------------------------------
+      # On Ubuntu, install packages via apt-get
+      - name: Install deps (Ubuntu)
+        if: matrix.os == 'ubuntu-latest'
         run: |
           sudo apt-get update
-          # apt names differ slightly from brew
           sudo apt-get install -y \
-            meson \
-            ninja-build \
-            libtbb-dev \
-            libflann-dev \
-            libmetis-dev \
-            libfftw3-dev \
-            libfftw3-mpi-dev \
-            liblz4-dev \
-            doxygen       
-            
-      #- name: Build library
-     #   run:  |
-     #         mkdir external && cd external 
-     #         git clone --branch julia-python-packages --depth 1 https://github.com/fcdimitr/sgtsnepi && cd sgtsnepi
-     #         meson setup build && meson compile -C build
-     #         cd ../..
-     #         pip install .
-              
-      - name: Install build tools
+            fftw3-dev liblz4-dev libtbb-dev flann-dev metis libmetis-dev \
+            doxygen
+      # On macOS, install packages via Homebrew
+      - name: Install deps (macOS)
+        if: matrix.os == 'macos-latest'
         run: |
-          # scikit-build-core includes scikit-build, pybind11 is for any pybind code, 
-          # and 'build' is the CLI tool `python -m build`
-             python -m pip install --upgrade pip
-             python -m pip install --upgrade build scikit-build-core pybind11 ninja
-
-      - name: Install cibuildwheel
-        run: |
-          python -m pip install cibuildwheel
-
-     
-      - name: Build manylinux wheels
+          brew update
+          brew install fftw lz4 tbb flann metis doxygen
+      # ------------------------------------------
+      # Build Wheels Using cibuildwheel
+      # ------------------------------------------
+      - name: Build Wheels (Linux)
+        if: matrix.os == 'ubuntu-latest'
         env:
-           CIBW_PLATFORM: "linux"
-           # Only 64-bit
-           CIBW_ARCHS_LINUX: "x86_64"
-           # Build only CPython 3.8 - 3.11
-           CIBW_BUILD: "cp38-* cp39-* cp310-* cp311-*"
-           # Use manylinux2014:latest image to avoid invalid date-based tags
-           CIBW_MANYLINUX_X86_64_IMAGE: "quay.io/pypa/manylinux2014_x86_64:latest"
-           # SKIP musllinux by matching the pattern "*-musllinux_*"
-           CIBW_SKIP: "*-musllinux_*"
-           CIBW_BEFORE_BUILD: |
-             yum install -y fftw-devel lz4-devel tbb-devel flann-devel metis-devel
-             python -m pip install --upgrade pip
-             python -m pip install meson ninja
-             mkdir -p external &&
-             cd external &&
-             rm -rf sgtsnepi/
-             git clone --branch julia-python-packages --depth=1 https://github.com/fcdimitr/sgtsnepi &&
-             cd sgtsnepi &&
-             meson setup build &&
-             meson compile -C build &&
-             cd ../..
+          # Only build 64-bit manylinux wheels, skip musllinux
+          CIBW_ARCHS_LINUX: "x86_64"
+          CIBW_SKIP: "*-musllinux_*"
+          CIBW_PLATFORM: "linux"
+          # Force a valid manylinux image (avoid date-based tags)
+          CIBW_MANYLINUX_X86_64_IMAGE: "quay.io/pypa/manylinux2014_x86_64:latest"
+          # Optional: build only for Python 3.8+
+          CIBW_BUILD: "cp38-* cp39-* cp310-* cp311-*"
+          # If you need to build an external library inside the container:
+          CIBW_BEFORE_BUILD: |
+            yum install -y fftw-devel lz4-devel tbb-devel flann-devel metis-devel
+            python -m pip install --upgrade pip
+            python -m pip install meson ninja
+            # ... any custom commands, e.g. clone & build external/sgtsnepi ...
         run: cibuildwheel --output-dir dist
-          
+      - name: Build Wheels (macOS)
+        if: matrix.os == 'macos-latest'
+        env:
+          # Build only for macOS
+          CIBW_PLATFORM: "macos"
+          # If you only want Python 3.8+ wheels on macOS as well
+          CIBW_BUILD: "cp38-* cp39-* cp310-* cp311-*"
+          # If you need to build an external library on macOS before building:
+          # CIBW_BEFORE_BUILD: |
+          #   brew install [any libs you forgot above... or build steps...]
+        run: cibuildwheel --output-dir dist
       - name: Show built wheels
         run: ls -l dist
-
-             
-      #- name: Build the wheel
-      #  run: |
-      #    python -m build --wheel --no-isolation
-
-      #- name: Show wheel in dist/
-      #  run: ls -l dist
