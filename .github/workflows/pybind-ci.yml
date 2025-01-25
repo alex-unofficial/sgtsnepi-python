@@ -26,13 +26,6 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           python -m pip install cibuildwheel twine
-
-      - name: Install Rtools (Windows)
-        # Rtools provides pkg-config on Windows
-        if: ${{ runner.os == 'Windows' }}
-        run: |
-            choco install rtools -y --no-progress --force --version=4.0.0.20220206
-            echo "c:\rtools40\ucrt64\bin;" >> $env:GITHUB_PATH
  
       # ------------------------------------------
       # Build Wheels Using cibuildwheel
@@ -42,15 +35,16 @@ jobs:
           CIBW_BUILD: "cp39-* cp310-* cp311-* cp312-*"
           CIBW_BEFORE_BUILD_MACOS: "brew update && brew install fftw"
           CIBW_BEFORE_BUILD_LINUX: "yum install -y fftw-devel"
-          CIBW_BEFORE_BUILD_WINDOWS: |
-            git clone https://github.com/microsoft/vcpkg.git
-            cd vcpkg; .\bootstrap-vcpkg.bat
-            vcpkg install fftw
+          CIBW_BEFORE_BUILD_WINDOWS: "git clone https://github.com/microsoft/vcpkg.git && cd vcpkg && .\\bootstrap-vcpkg.bat && .\\vcpkg.exe install fftw"
+        # git clone https://github.com/microsoft/vcpkg.git
+        # cd vcpkg 
+        # .\bootstrap-vcpkg.bat
+        # vcpkg install fftw
 
           
           # Only build 64-bit manylinux wheels, skip musllinux
           CIBW_ARCHS_LINUX: "x86_64"
-          CIBW_SKIP: "*-musllinux_*"
+          CIBW_SKIP: "*-win32 *-musllinux_*"
 
           # Force a valid manylinux image (avoid date-based tags)
           CIBW_MANYLINUX_X86_64_IMAGE: "quay.io/pypa/manylinux2014_x86_64:latest"
