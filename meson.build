@@ -8,6 +8,13 @@ project(
   default_options: ['cpp_std=c++20'],
 )
 
+if host_machine.system() == 'windows'
+    add_project_arguments(
+        '-Dcmake_toolchain_file=D:\\a\\sgtsnepi-python\\sgtsnepi-python\\vcpkg\\scripts\\buildsystems\\vcpkg.cmake',
+        '--vsenv'
+    )
+endif
+
 py3_mod = import('python')
 # py3 = py3_mod.find_installation('/opt/homebrew/anaconda3/envs/zettelkasten/bin/python', required: true)
 py3 = py3_mod.find_installation(required: true)
