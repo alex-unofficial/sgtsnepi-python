@@ -1,6 +1,6 @@
 project(
   'sgtsnepi',
-  ['c', 'cpp'],
+  'c', 'cpp', 'cython',
   # https://stackoverflow.com/questions/59201214/can-the-meson-project-version-be-assigned-dynamically
   version: '0.1', # FIXME: git hash (see URL above).
   license: 'GPLv3',
@@ -9,7 +9,8 @@ project(
 )
 
 py3_mod = import('python')
-py3 = py3_mod.find_installation(required: true)
+py3 = py3_mod.find_installation('/opt/homebrew/anaconda3/envs/zettelkasten/bin/python', required: true)
+# py3 = py3_mod.find_installation(required: true)
 
 py3_dep = py3.dependency()
 pybind11_inc = run_command(py3, '-c',

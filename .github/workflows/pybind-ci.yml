@@ -54,7 +54,7 @@ jobs:
         run: |
           # This will build wheels for all supported Python versions on the current OS.
           # By default, it runs a "pip wheel ." inside each Python interpreter environment.
-          cibuildwheel --output-dir dist
+          python -m cibuildwheel --output-dir dist
 
       - name: Show built wheels
         run: ls -l dist
