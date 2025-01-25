@@ -9,7 +9,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest]
+        os: [ubuntu-latest, macos-latest, windows-latest]
     runs-on: ${{ matrix.os }}
     steps:
       - name: Check out code
@@ -35,7 +35,11 @@ jobs:
           CIBW_BUILD: "cp39-* cp310-* cp311-* cp312-*"
           CIBW_BEFORE_BUILD_MACOS: "brew update && brew install fftw"
           CIBW_BEFORE_BUILD_LINUX: "yum install -y fftw-devel"
+          CIBW_BEFORE_BUILD_WINDOWS: |
+            powershell -Command "Set-ExecutionPolicy Bypass -Scope Process; [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; iwr https://raw.githubusercontent.com/microsoft/vcpkg/master/scripts/bootstrap.ps1 -useb | iex"
+            .\vcpkg.exe install fftw3:x64-windows
 
+          
           # Only build 64-bit manylinux wheels, skip musllinux
           CIBW_ARCHS_LINUX: "x86_64"
           CIBW_SKIP: "*-musllinux_*"
