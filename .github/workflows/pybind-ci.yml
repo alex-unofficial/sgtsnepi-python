@@ -14,12 +14,14 @@ jobs:
     steps:
       - name: Check out code
         uses: actions/checkout@v3
+
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           # You can also do a matrix of Python versions, but typically
           # cibuildwheel itself will handle multiple Python versions inside Docker (on Linux).
-          python-version: 3.8
+          python-version: 3.9
+
       - name: Upgrade pip & install cibuildwheel
         run: |
           python -m pip install --upgrade pip
@@ -32,72 +34,25 @@ jobs:
         if: matrix.os == 'ubuntu-latest'
         run: |
           sudo apt-get update
-          sudo apt-get install -y libfftw3-dev liblz4-dev libtbb-dev libflann-dev libmetis-dev doxygen
+          sudo apt-get install -y libfftw3-dev
       # On macOS, install packages via Homebrew
       - name: Install deps (macOS)
         if: matrix.os == 'macos-latest'
         run: |
           brew update
-          brew install fftw lz4 tbb flann metis doxygen
+          brew install fftw
       # ------------------------------------------
       # Build Wheels Using cibuildwheel
       # ------------------------------------------
       - name: Build Wheels (Linux)
-        if: matrix.os == 'ubuntu-latest'
-        env:
-          # Only build 64-bit manylinux wheels, skip musllinux
-          CIBW_ARCHS_LINUX: "x86_64"
-          CIBW_SKIP: "*-musllinux_*"
-          CIBW_PLATFORM: "linux"
-          # Force a valid manylinux image (avoid date-based tags)
-          CIBW_MANYLINUX_X86_64_IMAGE: "quay.io/pypa/manylinux2014_x86_64:latest"
-          # Optional: build only for Python 3.8+
-          CIBW_BUILD: "cp38-* cp39-* cp310-* cp311-*"
-          # If you need to build an external library inside the container:
-          CIBW_BEFORE_BUILD: |
-            #yum install -y fftw-devel lz4-devel tbb-devel flann-devel metis-devel
-             yum install -y fftw-devel lz4-devel tbb-devel flann-devel metis-devel
-             python -m pip install --upgrade pip
-             python -m pip install meson ninja
-             mkdir -p external &&
-             cd external &&
-             rm -rf sgtsnepi/
-             git clone --branch julia-python-packages --depth=1 https://github.com/fcdimitr/sgtsnepi &&
-             cd sgtsnepi &&
-             meson setup build &&
-             meson compile -C build &&
-             cd ../..
-             python -m pip install --upgrade pip
-             python -m pip install meson ninja
-            # ... any custom commands, e.g. clone & build external/sgtsnepi ...
-        run: cibuildwheel --output-dir dist
-      - name: Build Wheels (macOS)
-        if: matrix.os == 'macos-latest'
-        env:
-          # Build only for macOS
-          CIBW_PLATFORM: "macos"
-          # If you only want Python 3.8+ wheels on macOS as well
-          CIBW_BUILD: "cp38-* cp39-* cp310-* cp311-*"
-          # If you need to build an external library on macOS before building:
-          # CIBW_BEFORE_BUILD: |
-          CIBW_BEFORE_BUILD: |
-            #yum install -y fftw-devel lz4-devel tbb-devel flann-devel metis-devel
-            #yum install -y fftw-devel lz4-devel tbb-devel flann-devel metis-devel
-            brew install meson ninja tbb flann metis fftw lz4 doxygen # same as in your existing workflow.
-
-             python -m pip install --upgrade pip
-             python -m pip install meson ninja
-             mkdir -p external &&
-             cd external &&
-             rm -rf sgtsnepi/
-             git clone --branch julia-python-packages --depth=1 https://github.com/fcdimitr/sgtsnepi &&
-             cd sgtsnepi &&
-             meson setup build &&
-             meson compile -C build &&
-             cd ../..
-             python -m pip install --upgrade pip
-             python -m pip install meson ninja  
-          #   brew install [any libs you forgot above... or build steps...]
-        run: cibuildwheel --output-dir dist
+        run: |
+          # This will build wheels for all supported Python versions on the current OS.
+          # By default, it runs a "pip wheel ." inside each Python interpreter environment.
+          cibuildwheel --output-dir dist
       - name: Show built wheels
         run: ls -l dist
+
+      - name: Test one of the built wheels
+        run: |
+          python -m pip install dist/*.whl
+          python -c "import sgtsnepi; print('Imported sgtsnepi successfully!')"

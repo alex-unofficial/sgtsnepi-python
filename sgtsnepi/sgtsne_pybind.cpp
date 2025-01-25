@@ -1,11 +1,11 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/numpy.h>
 
-#include "../external/sgtsnepi/src/sgtsne.cpp"
+#include "sgtsne.cpp"
 
 namespace py = pybind11;
 
-py::array_t<double, py::array::c_style> _sgtsnepi_c(
+py::array_t<double, py::array::c_style> sgtsnepi_c(
 			 py::array_t<uint32_t, py::array::c_style> rows,
 			 py::array_t<uint32_t, py::array::c_style> cols,
 			 py::array_t<  double, py::array::c_style> vals,
@@ -69,6 +69,6 @@ py::array_t<double, py::array::c_style> _sgtsnepi_c(
 		return y;
 }
 
-PYBIND11_MODULE(_sgtsnepi_, m) {
-		m.def("_sgtsnepi_c", &_sgtsnepi_c);
+PYBIND11_MODULE(_sgtsnepi, m) {
+		m.def("sgtsnepi_c", &sgtsnepi_c);
 }

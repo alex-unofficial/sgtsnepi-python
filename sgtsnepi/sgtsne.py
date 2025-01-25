@@ -5,8 +5,7 @@ from scipy.sparse import csc_matrix
 
 from nextprod import nextprod
 
-from ._sgtsnepi_ import _sgtsnepi_c
-
+from . import _sgtsnepi
 
 def sgtsnepi(
     input_graph, y0=None, d=2, max_iter=1000, early_exag=250,
@@ -61,7 +60,7 @@ def sgtsnepi(
     h = 1.0 if h == 0 else h
     h = [max_iter + 1, h]
 
-    y = _sgtsnepi_c(
+    y = _sgtsnepi.sgtsnepi_c(
         numpy.array(input_graph.indices, dtype=numpy.uint32),
         numpy.array(input_graph.indptr, dtype=numpy.uint32),
         numpy.array(input_graph.data, dtype=numpy.float64),

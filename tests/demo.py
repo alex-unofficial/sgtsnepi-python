@@ -5,7 +5,7 @@ from scipy.sparse import csc_matrix
 
 import matplotlib.pyplot as plt
 
-from sgtsnepi import sgtsnepi
+from sgtsnepi.sgtsne import sgtsnepi
 
 if __name__ == '__main__':
     mm_filename = sys.argv[1]

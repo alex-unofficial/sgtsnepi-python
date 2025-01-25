@@ -40,7 +40,10 @@ dev = [
 
 [build-system]
 requires = [
-    "scikit-build-core>=0.5.0",
-    "pybind11"
-    ]
-build-backend = "scikit_build_core.build"
+  "wheel", # python package distribution lib.
+  "meson>=1.1.0", # meson buildsystem
+  'meson-python>=0.12.1', # meson to pip adapter
+  "pybind11>=2.10.4", # c++ to Python binding
+  "ninja>=1.11.1", # build tool for meson to use
+]
+build-backend = 'mesonpy'

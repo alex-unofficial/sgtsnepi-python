@@ -21,3 +21,6 @@ data/*.mtx
 *.venv
 .venv/
 
+subprojects/packagecache/
+subprojects/sgtsnepi*/
+.DS_Store
