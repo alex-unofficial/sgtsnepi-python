@@ -82,7 +82,9 @@ jobs:
           # CIBW_BEFORE_BUILD: |
           CIBW_BEFORE_BUILD: |
             #yum install -y fftw-devel lz4-devel tbb-devel flann-devel metis-devel
-             yum install -y fftw-devel lz4-devel tbb-devel flann-devel metis-devel
+            #yum install -y fftw-devel lz4-devel tbb-devel flann-devel metis-devel
+            brew install meson ninja tbb flann metis fftw lz4 doxygen # same as in your existing workflow.
+
              python -m pip install --upgrade pip
              python -m pip install meson ninja
              mkdir -p external &&
