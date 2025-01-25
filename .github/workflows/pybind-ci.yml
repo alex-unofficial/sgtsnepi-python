@@ -39,7 +39,7 @@ jobs:
           # Only build 64-bit manylinux wheels, skip musllinux
           CIBW_ARCHS_LINUX: "x86_64"
           CIBW_SKIP: "*-musllinux_*"
-          CIBW_PLATFORM: "linux"
+
           # Force a valid manylinux image (avoid date-based tags)
           CIBW_MANYLINUX_X86_64_IMAGE: "quay.io/pypa/manylinux2014_x86_64:latest"
 
@@ -47,7 +47,7 @@ jobs:
           CIBW_BEFORE_BUILD_WINDOWS: "choco install fftw --version=... || echo 'Adjust if no choco package'"
           # Force the wheel's minimum macOS version to 14.0
           MACOSX_DEPLOYMENT_TARGET: "14.0"
-          
+
         run: |
           # This will build wheels for all supported Python versions on the current OS.
           # By default, it runs a "pip wheel ." inside each Python interpreter environment.
