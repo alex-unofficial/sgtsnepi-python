@@ -33,8 +33,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y \
-            fftw3-dev liblz4-dev libtbb-dev flann-dev metis libmetis-dev \
-            doxygen
+          yum install -y fftw-devel lz4-devel tbb-devel flann-devel metis-devel doxygen
       # On macOS, install packages via Homebrew
       - name: Install deps (macOS)
         if: matrix.os == 'macos-latest'
