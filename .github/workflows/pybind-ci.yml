@@ -47,8 +47,6 @@ jobs:
           # Force a valid manylinux image (avoid date-based tags)
           CIBW_MANYLINUX_X86_64_IMAGE: "quay.io/pypa/manylinux2014_x86_64:latest"
 
-          # TODO: fix the fftw installation on Windows
-          CIBW_BEFORE_BUILD_WINDOWS: "choco install fftw --version=... || echo 'Adjust if no choco package'"
           # Force the wheel's minimum macOS version to 14.0
           MACOSX_DEPLOYMENT_TARGET: "14.0"
 
