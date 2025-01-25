@@ -80,6 +80,21 @@ jobs:
           CIBW_BUILD: "cp38-* cp39-* cp310-* cp311-*"
           # If you need to build an external library on macOS before building:
           # CIBW_BEFORE_BUILD: |
+          CIBW_BEFORE_BUILD: |
+            #yum install -y fftw-devel lz4-devel tbb-devel flann-devel metis-devel
+             yum install -y fftw-devel lz4-devel tbb-devel flann-devel metis-devel
+             python -m pip install --upgrade pip
+             python -m pip install meson ninja
+             mkdir -p external &&
+             cd external &&
+             rm -rf sgtsnepi/
+             git clone --branch julia-python-packages --depth=1 https://github.com/fcdimitr/sgtsnepi &&
+             cd sgtsnepi &&
+             meson setup build &&
+             meson compile -C build &&
+             cd ../..
+             python -m pip install --upgrade pip
+             python -m pip install meson ninja  
           #   brew install [any libs you forgot above... or build steps...]
         run: cibuildwheel --output-dir dist
       - name: Show built wheels
