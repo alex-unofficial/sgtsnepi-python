@@ -45,6 +45,9 @@ jobs:
       # Build Wheels Using cibuildwheel
       # ------------------------------------------
       - name: Build Wheels (Linux)
+        env:
+          # If you only want Python 3.8+ wheels on macOS as well
+          CIBW_BUILD: "cp38-* cp39-* cp310-* cp311-*"
         run: |
           # This will build wheels for all supported Python versions on the current OS.
           # By default, it runs a "pip wheel ." inside each Python interpreter environment.
