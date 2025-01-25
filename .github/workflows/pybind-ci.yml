@@ -9,7 +9,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest]
+        os: [ubuntu-latest, macos-14]
     runs-on: ${{ matrix.os }}
     steps:
       - name: Check out code
@@ -35,6 +35,14 @@ jobs:
           CIBW_BUILD: "cp39-* cp310-* cp311-* cp312-*"
           CIBW_BEFORE_BUILD_MACOS: "brew update && brew install fftw"
           CIBW_BEFORE_BUILD_LINUX: "yum install -y fftw-devel"
+
+          # Only build 64-bit manylinux wheels, skip musllinux
+          CIBW_ARCHS_LINUX: "x86_64"
+          CIBW_SKIP: "*-musllinux_*"
+          CIBW_PLATFORM: "linux"
+          # Force a valid manylinux image (avoid date-based tags)
+          CIBW_MANYLINUX_X86_64_IMAGE: "quay.io/pypa/manylinux2014_x86_64:latest"
+
           # TODO: fix the fftw installation on Windows
           CIBW_BEFORE_BUILD_WINDOWS: "choco install fftw --version=... || echo 'Adjust if no choco package'"
           # Force the wheel's minimum macOS version to 14.0
