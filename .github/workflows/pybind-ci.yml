@@ -35,12 +35,10 @@ jobs:
           CIBW_BUILD: "cp39-* cp310-* cp311-* cp312-*"
           CIBW_BEFORE_BUILD_MACOS: "brew update && brew install fftw"
           CIBW_BEFORE_BUILD_LINUX: "yum install -y fftw-devel"
-          CIBW_BEFORE_BUILD_WINDOWS: >
-            powershell -NoProfile -ExecutionPolicy Bypass -Command "
-            [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12;
-            iwr https://raw.githubusercontent.com/microsoft/vcpkg/master/scripts/bootstrap.ps1 -useb | iex;
-            .\vcpkg.exe install fftw3:x64-windows;
-            "
+          CIBW_BEFORE_BUILD_WINDOWS: |
+            git clone https://github.com/microsoft/vcpkg.git
+            cd vcpkg; .\bootstrap-vcpkg.bat
+            vcpkg install fftw
 
           
           # Only build 64-bit manylinux wheels, skip musllinux
