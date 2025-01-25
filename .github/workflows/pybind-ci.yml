@@ -41,7 +41,10 @@ jobs:
         # .\bootstrap-vcpkg.bat
         # vcpkg install fftw
 
-          
+          CIBW_MESON_ARGS_WINDOWS: >
+            --vsenv
+            -Dcmake_toolchain_file=%GITHUB_WORKSPACE%\\vcpkg\\scripts\\buildsystems\\vcpkg.cmake
+
           # Only build 64-bit manylinux wheels, skip musllinux
           CIBW_ARCHS_LINUX: "x86_64"
           CIBW_SKIP: "*-win32 *-musllinux_*"
