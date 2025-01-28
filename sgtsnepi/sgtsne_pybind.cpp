@@ -1,4 +1,5 @@
 #include <pybind11/pybind11.h>
+#include <pybind11/iostream.h>
 #include <pybind11/numpy.h>
 
 #include "sgtsne.cpp"
@@ -25,8 +26,22 @@ py::array_t<double, py::array::c_style> sgtsnepi_c(
 			 int n,
 			 bool drop_leaf,
 			 bool run_exact,
-			 int grid_threshold
+			 int grid_threshold,
+			 bool silent
 		) {
+
+		py::object output_target;
+		if(silent) {
+			// Discard output by redirecting to a dummy StringIO
+			output_target = py::module::import("io").attr("StringIO")();
+		} else {
+			// Use Python's sys.stdout
+			output_target = py::module::import("sys").attr("stdout");
+		}
+
+		// Redirect stdout to output_target
+		py::scoped_ostream_redirect out(std::cout, output_target);
+		py::scoped_estream_redirect err;
 
 		py::array_t<double, py::array::c_style> y({n,d});
 

@@ -11,7 +11,7 @@ def sgtsnepi(
     input_graph, y0=None, d=2, max_iter=1000, early_exag=250,
     lambda_par=1, h=1.0, bb=-1.0, eta=200.0, run_exact=False,
     fftw_single=False, alpha=12, drop_leaf=False,
-    grid_threshold=None
+    grid_threshold=None, silent=False
 ):
 
     # Import input_graph as CSC matrix
@@ -80,7 +80,8 @@ def sgtsnepi(
         n,
         drop_leaf,
         run_exact,
-        grid_threshold
+        grid_threshold,
+        silent
     )
 
     # permute y to (d, n)
