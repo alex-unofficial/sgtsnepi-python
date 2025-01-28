@@ -2,6 +2,7 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/iostream.h>
 #include <pybind11/numpy.h>
+#include <cstdio>
 
 #include "sgtsne.cpp"
 
@@ -53,6 +54,20 @@ py::array_t<double, py::array::c_style> sgtsnepi_c(
 		py::scoped_ostream_redirect err(std::cerr, error_target);
 
 		py::array_t<double, py::array::c_style> y({n,d});
+
+		// Redirect C-style stdout and stderr
+    FILE* original_stdout = stdout;
+    FILE* original_stderr = stderr;
+    if (silent) {
+        // Redirect stdout and stderr to /dev/null (Unix) or NUL (Windows)
+        #ifdef _WIN32
+            freopen("NUL", "w", stdout);
+            freopen("NUL", "w", stderr);
+        #else
+            freopen("/dev/null", "w", stdout);
+            freopen("/dev/null", "w", stderr);
+        #endif
+    }
 
 		// numpy.array(None) is (for some reason) translated
 		// as NaN in C++ with pybind11. see the github issue
