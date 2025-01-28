@@ -1,3 +1,4 @@
+#include <iostream>
 #include <pybind11/pybind11.h>
 #include <pybind11/iostream.h>
 #include <pybind11/numpy.h>
@@ -31,17 +32,20 @@ py::array_t<double, py::array::c_style> sgtsnepi_c(
 		) {
 
 		py::object output_target;
+		py::object error_target;
 		if(silent) {
 			// Discard output by redirecting to a dummy StringIO
 			output_target = py::module::import("io").attr("StringIO")();
+			error_target = py::module::import("io").attr("StringIO")();
 		} else {
 			// Use Python's sys.stdout
 			output_target = py::module::import("sys").attr("stdout");
+			error_target = py::module::import("sys").attr("stderr");
 		}
 
 		// Redirect stdout to output_target
 		py::scoped_ostream_redirect out(std::cout, output_target);
-		py::scoped_estream_redirect err;
+		py::scoped_estream_redirect err(std::cerr, error_target);
 
 		py::array_t<double, py::array::c_style> y({n,d});
 
