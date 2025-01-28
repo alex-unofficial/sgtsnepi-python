@@ -105,6 +105,17 @@ py::array_t<double, py::array::c_style> sgtsnepi_c(
 
 		std::copy(res, res + n * d, y.mutable_data());
 
+		// Restore original stdout and stderr
+    if (silent) {
+        #ifdef _WIN32
+            freopen("CON", "w", stdout);  // Restore stdout on Windows
+            freopen("CON", "w", stderr);  // Restore stderr on Windows
+        #else
+            freopen("/dev/tty", "w", stdout);  // Restore stdout on Unix
+            freopen("/dev/tty", "w", stderr);  // Restore stderr on Unix
+        #endif
+    }
+
 		return y;
 }
 
