@@ -32,9 +32,9 @@ py::array_t<double, py::array::c_style> sgtsnepi_c(
 			 bool silent
 		) {
 
-		static py::object sys_stdout = py::module::import("sys").attr("stdout");
-    static py::object sys_stderr = py::module::import("sys").attr("stderr");
-    static py::object StringIO = py::module::import("io").attr("StringIO");
+		py::object sys_stdout = py::module::import("sys").attr("stdout");
+    py::object sys_stderr = py::module::import("sys").attr("stderr");
+    py::object StringIO = py::module::import("io").attr("StringIO");
 
 		py::object output_target;
 		py::object error_target;
@@ -104,6 +104,9 @@ py::array_t<double, py::array::c_style> sgtsnepi_c(
 		);
 
 		std::copy(res, res + n * d, y.mutable_data());
+
+		// Cleanup
+		delete [] res;
 
 		// Restore original stdout and stderr
     if (silent) {
