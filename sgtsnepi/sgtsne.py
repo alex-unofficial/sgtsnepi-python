@@ -34,7 +34,7 @@ def sgtsnepi(
 
     nnz = input_graph.nnz
 
-    if numpy.min(input_graph.data) < 0:
+    if input_graph.data.size > 0 and numpy.min(input_graph.data) < 0:
         raise ValueError("Negative edge weights are not supported")
 
     if y0 is not None:
@@ -45,6 +45,8 @@ def sgtsnepi(
 
         if y0.shape != (d, n):
             raise ValueError("y0 must be of shape (d, n)")
+
+        y0 = numpy.transpose(y0)
 
     # Setting parameters correctly
     list_grid_sizes = [nextprod((2, 3, 5), x) for x in range(16, 512)]
