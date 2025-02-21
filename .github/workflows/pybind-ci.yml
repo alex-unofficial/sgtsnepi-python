@@ -60,7 +60,7 @@ jobs:
         run: ls -l dist
 
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           # We'll name each artifact distinctly, so we can download them all later
           name: dist-${{ matrix.os }}
@@ -87,7 +87,7 @@ jobs:
 
       # Download artifacts for *each* OS
       - name: Download artifacts from Ubuntu
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: dist-ubuntu-latest
           path: dist
