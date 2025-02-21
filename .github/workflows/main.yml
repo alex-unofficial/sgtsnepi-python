@@ -1,128 +1,90 @@
-name: Build, Test, and Publish
-
+name: Build Wheels (Linux + macOS)
 on:
   push:
-    # Include normal branches so we can do the build/test on them.
     branches: [ "master" ]
-    # Also trigger when you push a tag (e.g. "v0.1.0").
     tags: [ "v*" ]
   pull_request:
     branches: [ "master" ]
-
 jobs:
-  build-and-test:
+  build-wheels:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest]#, macos-latest]#, windows-latest]
-        python-version: [3.8]
+        os: [ubuntu-latest, macos-latest] #, windows-latest]
 
     runs-on: ${{ matrix.os }}
 
     steps:
       - name: Check out code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v4
+      - name: Build Wheels using cibuildwheel
+        uses: pypa/cibuildwheel@v2.22.0
+        env:
+          CIBW_BUILD: "cp39-* cp310-* cp311-* cp312-*"
+          CIBW_BEFORE_BUILD_MACOS: "brew update && brew install fftw"
+          CIBW_BEFORE_BUILD_LINUX: "yum install -y fftw-devel"
+          CIBW_BEFORE_BUILD_WINDOWS: "git clone https://github.com/microsoft/vcpkg.git && cd vcpkg && .\\bootstrap-vcpkg.bat && .\\vcpkg.exe install fftw3:x64-windows"
+        # git clone https://github.com/microsoft/vcpkg.git
+        # cd vcpkg 
+        # .\bootstrap-vcpkg.bat
+        # vcpkg install fftw
+
+          # Only build 64-bit manylinux wheels, skip musllinux
+          CIBW_ARCHS_LINUX: "x86_64"
+          CIBW_SKIP: "*-win32 *-musllinux_*"
+
+          # Force a valid manylinux image (avoid date-based tags)
+          CIBW_MANYLINUX_X86_64_IMAGE: "quay.io/pypa/manylinux2014_x86_64:latest"
+
+          # Force the wheel's minimum macOS version to 14.0
+          MACOSX_DEPLOYMENT_TARGET: "14.0"
         with:
-          python-version: ${{ matrix.python-version }}
+          output-dir: dist
 
-      # Install system dependencies per OS (omitted here for brevity),
-      - name: Install system dependencies (Ubuntu)
-        # Only run this step if on ubuntu-latest
-        if: matrix.os == 'ubuntu-latest'
-        run: |
-          sudo apt-get update
-          # apt names differ slightly from brew
-          sudo apt-get install -y \
-            meson \
-            ninja-build \
-            libtbb-dev \
-            libflann-dev \
-            libmetis-dev \
-            libfftw3-dev \
-            libfftw3-mpi-dev \
-            liblz4-dev \
-            doxygen
-            
-      - name: Install system dependencies (macOS)
-        # Only run this step if on macos-latest
-        if: matrix.os == 'macos-latest'
-        run: |
-          brew update
-          # Install native libs for meson, ninja, TBB, FLANN, METIS, FFTW, LZ4, etc.
-          brew install meson ninja tbb flann metis fftw lz4 doxygen # same as in your existing workflow.
+      - name: Show built wheels
+        run: ls -l dist
 
-      - name: Upgrade pip
-        run: python -m pip install --upgrade pip
-
-      - name: Install Python dependencies
-        run: python -m pip install .[dev]
-
-      - name: Build wheel/sdist
-        run: |
-          python -m pip install --upgrade build wheel meson ninja
-          python -m build --sdist --wheel --no-isolation
-
-      - name: Smoke test
-        run: |
-          echo "%%MatrixMarket matrix coordinate real symmetric" > test.mtx
-          echo "4 4 4" >> test.mtx
-          echo "1 2 1.0" >> test.mtx
-          echo "2 3 2.0" >> test.mtx
-          echo "3 4 3.0" >> test.mtx
-          echo "4 1 4.0" >> test.mtx
-
-          python tests/demo.py test.mtx 2
-          echo "Tests complete!"
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          # We'll name each artifact distinct, so we can download them all later
+          # We'll name each artifact distinctly, so we can download them all later
           name: dist-${{ matrix.os }}
-          path: dist/*
+          path: dist/*.whl
+
   publish:
-  # We only publish if the build-and-test job passes for all OSes.
-    needs: [build-and-test]
+    needs: [build-wheels]
     runs-on: ubuntu-latest
 
     # Only publish on tag pushes: e.g. "v0.1.0"
-    # if: startsWith(github.ref, 'refs/tags/')
+    if: startsWith(github.ref, 'refs/tags/')
 
     steps:
       - name: Check out code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: 3.8
+          python-version: 3.11
 
       - name: Install Twine
         run: python -m pip install --upgrade twine
 
-      # Download artifacts from *each* OS
+      # Download artifacts for *each* OS
       - name: Download artifacts from Ubuntu
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: dist-ubuntu-latest
           path: dist
           if-no-files-found: ignore
 
-      #- name: Download artifacts from macOS
-      #  uses: actions/download-artifact@v3
-      #  with:
-      #    name: dist-macos-latest
-      #    path: dist
-      #    if-no-files-found: ignore
-
-      #- name: Download artifacts from Windows
-      #  uses: actions/download-artifact@v3
-      #  with:
-      #    name: dist-windows-latest
-      #    path: dist
-      #    if-no-files-found: ignore
+      - name: Download artifacts from macOS
+        uses: actions/download-artifact@v4
+        with:
+          name: dist-macos-latest
+          path: dist
+          if-no-files-found: ignore
 
       - name: Publish to PyPI
         run: |
@@ -132,3 +94,4 @@ jobs:
         env:
           TWINE_USERNAME: ${{ secrets.TEST_PYPI_USERNAME }}
           TWINE_PASSWORD: ${{ secrets.TEST_PYPI_PASSWORD }}
+
