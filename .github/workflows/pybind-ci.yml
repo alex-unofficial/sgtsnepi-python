@@ -13,24 +13,13 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - name: Check out code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          # You can also do a matrix of Python versions, but typically
-          # cibuildwheel itself will handle multiple Python versions inside Docker (on Linux).
-          python-version: 3.11
-
-      - name: Upgrade pip & install cibuildwheel
-        run: |
-          python -m pip install --upgrade pip
-          python -m pip install cibuildwheel twine
- 
       # ------------------------------------------
       # Build Wheels Using cibuildwheel
       # ------------------------------------------
       - name: Build Wheels
+        uses: pypa/cibuildwheel@v2.22.0
         env:
           CIBW_BUILD: "cp39-* cp310-* cp311-* cp312-*"
           CIBW_BEFORE_BUILD_MACOS: "brew update && brew install fftw"
@@ -50,11 +39,8 @@ jobs:
 
           # Force the wheel's minimum macOS version to 14.0
           MACOSX_DEPLOYMENT_TARGET: "14.0"
-
-        run: |
-          # This will build wheels for all supported Python versions on the current OS.
-          # By default, it runs a "pip wheel ." inside each Python interpreter environment.
-          python -m cibuildwheel --output-dir dist
+        with:
+          output-dir: dist
 
       - name: Show built wheels
         run: ls -l dist
@@ -64,7 +50,7 @@ jobs:
         with:
           # We'll name each artifact distinctly, so we can download them all later
           name: dist-${{ matrix.os }}
-          path: dist/*
+          path: dist/*.whl
 
   publish:
     needs: [build-wheels]
@@ -75,7 +61,7 @@ jobs:
 
     steps:
       - name: Check out code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up Python
         uses: actions/setup-python@v4
