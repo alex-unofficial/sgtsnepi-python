@@ -10,7 +10,7 @@ build/
 *.egg-info/
 
 # Third-party library directory
-libsgtsnepi/
+external/
 
 # Data files
 data/*.mtx

@@ -1,8 +1,43 @@
 [build-system]
-requires = [
-	"setuptools>=61.0", 
-	"wheel", 
-	"meson",
-	"ninja"
-	]
-build-backend = "setuptools.build_meta"
+requires = ["scikit-build-core", "pybind11"]
+build-backend = "scikit_build_core.build"
+
+[project]
+name = "sgtsnepi"
+version = "0.1.0"
+authors = [{name = "Alexandros Athanasiadis", email = "athanasiadisalex2@gmail.com"}]
+description = "SG-t-SNE-Π wrapper for Python"
+license = {text = "GPLv3"}
+python-requires = ">=3.7"
+classifiers = [
+    "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+    "Programming Language :: C",
+    "Programming Language :: C++",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+
+dependencies = [
+    "numpy >= 1.19.5",
+    "scipy >= 1.7.3",
+    "nextprod >= 1.0",
+]
+
+[project.readme]
+file = "README.md"
+content-type = "text/markdown"
+
+[project.urls]
+Homepage = "https://github.com/alex-unofficial/sgtsnepi-python"
+
+[project.optional-dependencies]
+dev = [
+    "matplotlib >= 3.5",
+    "pylint >= 2.17",
+    "flake8 >= 6.0",
+]
