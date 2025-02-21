@@ -10,7 +10,7 @@ build/
 *.egg-info/
 
 # Third-party library directory
-libsgtsnepi/
+external/
 
 # Data files
 data/*.mtx
@@ -21,3 +21,6 @@ data/*.mtx
 *.venv
 .venv/
 
+subprojects/packagecache/
+subprojects/sgtsnepi*/
+.DS_Store

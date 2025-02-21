@@ -1,0 +1,6 @@
+[wrap-file]
+directory = sgtsnepi-3.0.0-julia-python
+source_url = https://github.com/fcdimitr/sgtsnepi/archive/refs/tags/v3.0.0-julia-python.tar.gz
+source_filename = sgtsnepi-3.0.0.tar.gz
+source_hash = abb4afe8d0f7515787ca71f5220d6891eba73622ec3f813af07a2f90ae9d89ec
+diff_files  = disable_install.patch

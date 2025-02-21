@@ -1,0 +1,11 @@
+--- a/meson.build
++++ b/meson.build
+@@ -131,7 +131,7 @@ sgtsnepi_lib = shared_library(
+   'sgtsnepi', 
+   sgtsnepi_src,
+   dependencies: [libs_dep],
+-  install: true,
++  install: false,
+   install_dir: 'lib',
+   soversion: vso
+ )
