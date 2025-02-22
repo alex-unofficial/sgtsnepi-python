@@ -2,7 +2,7 @@ project(
   'sgtsnepi',
   'c', 'cpp',
   # https://stackoverflow.com/questions/59201214/can-the-meson-project-version-be-assigned-dynamically
-  version: '0.3.5', # FIXME: git hash (see URL above).
+  version: '0.3.6', # FIXME: git hash (see URL above).
   license: 'GPLv3',
   meson_version: '>= 1.1.0',
   default_options: ['cpp_std=c++20'],
