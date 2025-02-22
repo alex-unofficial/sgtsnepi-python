@@ -7,6 +7,7 @@ on:
     branches: [ "master" ]
 jobs:
   build-wheels:
+    name: Build wheels on ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
@@ -15,8 +16,7 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
-      - name: Check out code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Build Wheels using cibuildwheel
         uses: pypa/cibuildwheel@v2.22.0
@@ -25,10 +25,10 @@ jobs:
           CIBW_BEFORE_BUILD_MACOS: "brew update && brew install fftw"
           CIBW_BEFORE_BUILD_LINUX: "yum install -y fftw-devel"
           CIBW_BEFORE_BUILD_WINDOWS: "git clone https://github.com/microsoft/vcpkg.git && cd vcpkg && .\\bootstrap-vcpkg.bat && .\\vcpkg.exe install fftw3:x64-windows"
-        # git clone https://github.com/microsoft/vcpkg.git
-        # cd vcpkg 
-        # .\bootstrap-vcpkg.bat
-        # vcpkg install fftw
+          # git clone https://github.com/microsoft/vcpkg.git
+          # cd vcpkg 
+          # .\bootstrap-vcpkg.bat
+          # vcpkg install fftw
 
           # Only build 64-bit manylinux wheels, skip musllinux
           CIBW_ARCHS_LINUX: "x86_64"
@@ -49,11 +49,25 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           # We'll name each artifact distinctly, so we can download them all later
-          name: dist-${{ matrix.os }}
+          name: cibw-wheels-${{ matrix.os }}-${{ strategy.job-index }}
           path: dist/*.whl
 
+  make-sdist:
+    name: Make SDist
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build SDist
+        run: pipx run build --sdist
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cibw-sdist
+          path: dist/*.tar.gz
+
   publish:
-    needs: [build-wheels]
+    needs: [build-wheels, make-sdist]
     runs-on: ubuntu-latest
 
     # Only publish on tag pushes: e.g. "v0.1.0"
@@ -72,19 +86,12 @@ jobs:
         run: python -m pip install --upgrade twine
 
       # Download artifacts for *each* OS
-      - name: Download artifacts from Ubuntu
+      - name: Download wheels
         uses: actions/download-artifact@v4
         with:
-          name: dist-ubuntu-latest
+          pattern: cibw-*
           path: dist
-          if-no-files-found: ignore
-
-      - name: Download artifacts from macOS
-        uses: actions/download-artifact@v4
-        with:
-          name: dist-macos-latest
-          path: dist
-          if-no-files-found: ignore
+          merge-multiple: true
 
       - name: Show downloaded wheels
         run: ls -l dist
