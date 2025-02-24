@@ -1,6 +1,6 @@
 [project]
 name = "sgtsnepi"
-version = "0.3.9"
+version = "0.4"
 authors = [{name = "Alexandros Athanasiadis", email = "athanasiadisalex2@gmail.com"}]
 description = "SG-t-SNE-Π wrapper for Python"
 license = {text = "GPLv3"}
