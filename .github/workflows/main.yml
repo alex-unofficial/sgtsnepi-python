@@ -73,5 +73,5 @@ jobs:
       - name: Show downloaded wheels
         run: ls -l dist
 
-      - name: Publish to TestPyPI
+      - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
