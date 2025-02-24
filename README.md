@@ -11,36 +11,16 @@ a d-dimensional space (d=1,2,3) on a shared-memory computer.
 
 ### Prerequisites
 
-SG-t-SNE-Π uses the following open-source software:
+`sgtsnepi` currently only supports Linux and MacOS.
+Windows support will be available in the near-future.
 
--   [FFTW3](http://www.fftw.org/) 3.3.8
--   [METIS](http://glaros.dtc.umn.edu/gkhome/metis/metis/overview) 5.1.0
--   [FLANN](https://www.cs.ubc.ca/research/flann/) 1.9.1
--   [Intel TBB](https://01.org/tbb) 2019
--   [LZ4](https://github.com/lz4/lz4) 1.9.1
--   [Doxygen](http://www.doxygen.nl/) 1.8.14
-
-Before installing the module you must install the software dependencies
-with your package manager of choice.
-
-On Ubuntu:
-```sh
-sudo apt-get install libtbb-dev libflann-dev libmetis-dev libfftw3-dev liblz4-dev doxygen
-```
-
-On macOS:
-```sh
-brew install flann tbb metis fftw lz4 doxygen
-```
+Installation requires `Python 3.9` or higher.
 
 ### Installing the Module
 
-As of this point in the development it is recommended to work inside of a
-`Python` [virtual environment](https://docs.python.org/3/library/venv.html)
-
 To install the package run
 ```sh
-pip install git+https://github.com/alex-unofficial/sgtsnepi-python.git
+pip install sgtsnepi
 ```
 
 Then in your Python code run the following to import the library:
@@ -65,7 +45,7 @@ sgtsnepi(sparse_matrix, args)
 
 To use the demo you should install [matplotlib](https://matplotlib.org/) by running
 ```sh
-pip install matplotlib
+pip install scipy matplotlib
 ```
 
 Then from the source directory run
@@ -75,6 +55,8 @@ python tests/demo.py mm_file.mtx ndim
 where `mm_file.mtx` is a file containing the input matrix which is in the
 [Matrix Market](https://math.nist.gov/MatrixMarket/index.html) file format,
 and `ndim` is the number of embedding dimensions.
+
+You can find some compressed `MatrixMarket` files in the `data/` subdirectory.
 
 ## Citation
 

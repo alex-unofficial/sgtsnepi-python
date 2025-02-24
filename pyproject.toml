@@ -1,21 +1,20 @@
 [project]
 name = "sgtsnepi"
-version = "0.4"
+version = "0.4.1"
 authors = [{name = "Alexandros Athanasiadis", email = "athanasiadisalex2@gmail.com"}]
 description = "SG-t-SNE-Π wrapper for Python"
 license = {text = "GPLv3"}
-python-requires = ">=3.7"
+python-requires = ">=3.9"
 classifiers = [
     "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
     "Programming Language :: C",
     "Programming Language :: C++",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.7",
-    "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
 ]
 
 dependencies = [
