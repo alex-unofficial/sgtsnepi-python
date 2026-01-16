@@ -37,8 +37,8 @@ jobs:
           # Force a valid manylinux image (avoid date-based tags)
           CIBW_MANYLINUX_X86_64_IMAGE: "quay.io/pypa/manylinux2014_x86_64:latest"
 
-          # Force the wheel's minimum macOS version to 14.0
-          MACOSX_DEPLOYMENT_TARGET: "14.0"
+          # Force the wheel's minimum macOS version to 15.0
+          MACOSX_DEPLOYMENT_TARGET: "15.0"
         with:
           output-dir: dist
 
