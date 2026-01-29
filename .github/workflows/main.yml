@@ -48,7 +48,7 @@ jobs:
         run: ls -l dist
 
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           # We'll name each artifact distinctly, so we can download them all later
           name: cibw-wheels-${{ matrix.os }}-${{ strategy.job-index }}
