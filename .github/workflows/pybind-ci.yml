@@ -13,13 +13,13 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - name: Check out code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       # ------------------------------------------
       # Build Wheels Using cibuildwheel
       # ------------------------------------------
       - name: Build Wheels
-        uses: pypa/cibuildwheel@v2.22.0
+        uses: pypa/cibuildwheel@v3.3.1
         env:
           CIBW_BUILD: "cp39-* cp310-* cp311-* cp312-*"
           CIBW_BEFORE_BUILD_MACOS: "brew update && brew install fftw"
@@ -46,7 +46,7 @@ jobs:
         run: ls -l dist
 
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           # We'll name each artifact distinctly, so we can download them all later
           name: dist-${{ matrix.os }}
