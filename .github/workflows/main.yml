@@ -21,7 +21,10 @@ jobs:
       - name: Build Wheels using cibuildwheel
         uses: pypa/cibuildwheel@v3.3.1
         env:
-          CIBW_BUILD: "cp39-* cp310-* cp311-* cp312-* cp313-* cp314-*"
+          # Skip Python versions older than 3.9 (matches pyproject.toml python-requires)
+          # This allows automatic building for new Python versions as they're added to cibuildwheel
+          CIBW_SKIP: "cp36-* cp37-* cp38-* *-win32 *-musllinux_*"
+          
           CIBW_BEFORE_BUILD_MACOS: "brew update && brew install fftw"
           CIBW_BEFORE_BUILD_LINUX: "yum install -y fftw-devel"
           CIBW_BEFORE_BUILD_WINDOWS: "git clone https://github.com/microsoft/vcpkg.git && cd vcpkg && .\\bootstrap-vcpkg.bat && .\\vcpkg.exe install fftw3:x64-windows"
@@ -30,9 +33,8 @@ jobs:
           # .\bootstrap-vcpkg.bat
           # vcpkg install fftw
 
-          # Only build 64-bit manylinux wheels, skip musllinux
+          # Only build 64-bit Linux wheels
           CIBW_ARCHS_LINUX: "x86_64"
-          CIBW_SKIP: "*-win32 *-musllinux_*"
 
           # Force a valid manylinux image (avoid date-based tags)
           CIBW_MANYLINUX_X86_64_IMAGE: "quay.io/pypa/manylinux2014_x86_64:latest"
