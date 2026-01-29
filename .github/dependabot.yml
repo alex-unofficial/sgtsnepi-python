@@ -3,7 +3,7 @@
 
 version: 2
 updates:
-  # Update GitHub Actions workflows
+  # Update GitHub Actions workflows (including cibuildwheel)
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
@@ -15,20 +15,3 @@ updates:
       prefix: "ci"
       include: "scope"
     open-pull-requests-limit: 5
-
-  # Update Python dependencies in GitHub Actions
-  # This will update cibuildwheel and other Python-related actions
-  - package-ecosystem: "pip"
-    directory: "/"
-    schedule:
-      interval: "weekly"
-    labels:
-      - "dependencies"
-      - "python"
-    commit-message:
-      prefix: "deps"
-      include: "scope"
-    open-pull-requests-limit: 5
-    # Only update build dependencies, not runtime dependencies
-    allow:
-      - dependency-type: "all"

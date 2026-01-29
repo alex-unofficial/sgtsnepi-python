@@ -33,7 +33,7 @@ jobs:
           # .\bootstrap-vcpkg.bat
           # vcpkg install fftw
 
-          # Only build 64-bit manylinux wheels, skip musllinux
+          # Only build 64-bit Linux wheels
           CIBW_ARCHS_LINUX: "x86_64"
 
           # Force a valid manylinux image (avoid date-based tags)
