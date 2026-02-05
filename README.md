@@ -5,7 +5,7 @@ This repository aims to provide a `Python` interface to
 software for swift embedding of a large, sparse graph into
 a d-dimensional space (d=1,2,3) on a shared-memory computer.
 
-> :warning: **Warning!** This repository is still a work in progress and is not ready for general use.
+> :warning: **Warning!** This package is still a work in progress.
 
 ## Installation
 
@@ -14,6 +14,9 @@ a d-dimensional space (d=1,2,3) on a shared-memory computer.
 `sgtsnepi` supports Linux, macOS, and Windows.
 
 Installation requires `Python 3.9` or higher.
+
+Wheels are not built for all architectures as of now.
+If your architecture is not supported please open a relevant issue on the GitHub page.
 
 ### Installing the Module
 
