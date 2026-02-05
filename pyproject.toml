@@ -45,5 +45,6 @@ requires = [
   'meson-python>=0.12.1', # meson to pip adapter
   "pybind11>=2.10.4", # c++ to Python binding
   "ninja>=1.11.1", # build tool for meson to use
+  "delvewheel>=0.0.16", # bundle DLL dependencies on Windows
 ]
 build-backend = 'mesonpy'
