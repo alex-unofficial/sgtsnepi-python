@@ -27,12 +27,10 @@ jobs:
           CIBW_BEFORE_BUILD_WINDOWS: >
             (if not exist C:\\vcpkg git clone --depth 1 https://github.com/microsoft/vcpkg.git C:\\vcpkg) &&
             (if not exist C:\\vcpkg\\vcpkg.exe C:\\vcpkg\\bootstrap-vcpkg.bat) &&
-            C:\\vcpkg\\vcpkg.exe install fftw3:x64-windows-static pkgconf:x64-windows
+            C:\\vcpkg\\vcpkg.exe install fftw3:x64-windows-static
           
-          # Environment variables for Windows to help meson find static FFTW via vcpkg
+          # Environment variables for Windows to help meson find static FFTW via CMake
           CIBW_ENVIRONMENT_WINDOWS: >
-            PKG_CONFIG=C:\\vcpkg\\installed\\x64-windows-static\\tools\\pkgconf\\pkgconf.exe
-            PKG_CONFIG_PATH=C:\\vcpkg\\installed\\x64-windows-static\\lib\\pkgconfig
             CMAKE_PREFIX_PATH=C:\\vcpkg\\installed\\x64-windows-static
 
           # Only build 64-bit manylinux wheels, skip musllinux
