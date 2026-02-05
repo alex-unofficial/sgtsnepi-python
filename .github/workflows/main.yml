@@ -28,6 +28,7 @@ jobs:
           CIBW_BEFORE_BUILD_MACOS: "brew update && brew install fftw"
           CIBW_BEFORE_BUILD_LINUX: "yum install -y fftw-devel"
           CIBW_BEFORE_BUILD_WINDOWS: >
+            pip install delvewheel &&
             (if not exist C:\\vcpkg git clone --depth 1 https://github.com/microsoft/vcpkg.git C:\\vcpkg) &&
             (if not exist C:\\vcpkg\\vcpkg.exe C:\\vcpkg\\bootstrap-vcpkg.bat) &&
             C:\\vcpkg\\vcpkg.exe install fftw3:x64-windows pkgconf:x64-windows
