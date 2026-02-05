@@ -24,3 +24,4 @@ data/*.mtx
 subprojects/packagecache/
 subprojects/sgtsnepi*/
 .DS_Store
+.vscode/settings.json
