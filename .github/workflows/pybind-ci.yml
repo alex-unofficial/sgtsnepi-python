@@ -1,4 +1,4 @@
-name: Build Wheels (Linux + macOS)
+name: Build Wheels (Linux + macOS + Windows)
 on:
   push:
     branches: [ "pybind" ]
@@ -9,7 +9,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest] #, windows-latest]
+        os: [ubuntu-latest, macos-latest, windows-latest]
     runs-on: ${{ matrix.os }}
     steps:
       - name: Check out code
@@ -24,11 +24,16 @@ jobs:
           CIBW_BUILD: "cp39-* cp310-* cp311-* cp312-*"
           CIBW_BEFORE_BUILD_MACOS: "brew update && brew install fftw"
           CIBW_BEFORE_BUILD_LINUX: "yum install -y fftw-devel"
-          CIBW_BEFORE_BUILD_WINDOWS: "git clone https://github.com/microsoft/vcpkg.git && cd vcpkg && .\\bootstrap-vcpkg.bat && .\\vcpkg.exe install fftw3:x64-windows"
-        # git clone https://github.com/microsoft/vcpkg.git
-        # cd vcpkg 
-        # .\bootstrap-vcpkg.bat
-        # vcpkg install fftw
+          CIBW_BEFORE_BUILD_WINDOWS: >
+            git clone --depth 1 https://github.com/microsoft/vcpkg.git C:\\vcpkg &&
+            C:\\vcpkg\\bootstrap-vcpkg.bat &&
+            C:\\vcpkg\\vcpkg.exe install fftw3:x64-windows pkgconf:x64-windows
+          
+          # Environment variables for Windows to help meson find FFTW via vcpkg
+          CIBW_ENVIRONMENT_WINDOWS: >
+            PKG_CONFIG=C:\\vcpkg\\installed\\x64-windows\\tools\\pkgconf\\pkgconf.exe
+            PKG_CONFIG_PATH=C:\\vcpkg\\installed\\x64-windows\\lib\\pkgconfig
+            CMAKE_PREFIX_PATH=C:\\vcpkg\\installed\\x64-windows
 
           # Only build 64-bit manylinux wheels, skip musllinux
           CIBW_ARCHS_LINUX: "x86_64"
