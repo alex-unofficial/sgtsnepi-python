@@ -40,6 +40,9 @@ jobs:
           # Build FFTW from source with current MinGW toolchain for ABI compatibility
           CIBW_BEFORE_ALL_WINDOWS: >
             C:\\msys64\\usr\\bin\\bash.exe -lc "
+            echo '=== Installing MinGW toolchain ===' &&
+            pacman -Sy --noconfirm mingw-w64-x86_64-toolchain &&
+            export PATH=/mingw64/bin:\$PATH &&
             echo '=== BUILDING FFTW 3.3.10 FROM SOURCE ===' &&
             cd /tmp &&
             curl -L http://www.fftw.org/fftw-3.3.10.tar.gz -o fftw.tar.gz &&
