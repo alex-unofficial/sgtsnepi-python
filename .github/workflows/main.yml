@@ -41,10 +41,13 @@ jobs:
           
           # Install FFTW from MSYS2 once for all Windows builds (consistent MinGW toolchain)
           CIBW_BEFORE_ALL_WINDOWS: >
-            echo "=== INSTALLING FFTW FROM MSYS2 ===" &&
-            C:\\msys64\\usr\\bin\\bash.exe -lc "pacman -Sy --noconfirm mingw-w64-x86_64-fftw" &&
+            echo "=== UPDATING MSYS2 AND INSTALLING FFTW ===" &&
+            C:\\msys64\\usr\\bin\\bash.exe -lc "pacman -Syu --noconfirm" &&
+            C:\\msys64\\usr\\bin\\bash.exe -lc "pacman -S --noconfirm --needed mingw-w64-x86_64-fftw" &&
             echo "=== VERIFYING INSTALLATION ===" &&
-            C:\\msys64\\usr\\bin\\bash.exe -lc "pacman -Ql mingw-w64-x86_64-fftw | grep -E '(\.dll|\.a|fftw3\.h)$' | head -20"
+            C:\\msys64\\usr\\bin\\bash.exe -lc "pacman -Ql mingw-w64-x86_64-fftw | grep -E '(\.dll|\.a|fftw3\.h)$' | head -20" &&
+            echo "=== CHECKING DLL DATES ===" &&
+            ls -la C:/msys64/mingw64/bin/libfftw*.dll
           
           # Environment variables for Windows to use MSYS2 FFTW
           CIBW_ENVIRONMENT_WINDOWS: >
