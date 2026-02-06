@@ -31,12 +31,15 @@ jobs:
             pip install delvewheel &&
             curl -L https://fftw.org/pub/fftw/fftw-3.3.5-dll64.zip -o fftw.zip &&
             unzip -q fftw.zip -d C:/fftw &&
+            ls -la C:/fftw &&
+            find C:/fftw -name "*.def" &&
             cd C:/fftw &&
+            (test -f libfftw3-3.def || cd */) &&
+            pwd &&
             ls -la &&
             dlltool -d libfftw3-3.def -l libfftw3.dll.a &&
             dlltool -d libfftw3f-3.def -l libfftw3f.dll.a &&
-            dlltool -d libfftw3l-3.def -l libfftw3l.dll.a &&
-            ls -la
+            dlltool -d libfftw3l-3.def -l libfftw3l.dll.a
           
           # Environment variables for Windows to use downloaded FFTW
           CIBW_ENVIRONMENT_WINDOWS: >
