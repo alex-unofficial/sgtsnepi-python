@@ -250,41 +250,24 @@ jobs:
       - name: Test import with diagnostics
         shell: bash
         run: |
-          cd $TMPDIR
+          # Create and use a clean temp directory (not $TMPDIR which can be in repo)
+          TEST_DIR=$(mktemp -d)
+          cd "$TEST_DIR"
+          echo "Testing from: $TEST_DIR"
           
           echo "=== Test 1: Import sgtsnepi module ==="
-          python -c "from sgtsnepi import sgtsnepi; print('✓ Successfully imported sgtsnepi')" || echo "✗ Failed to import sgtsnepi"
+          python -c "from sgtsnepi import sgtsnepi; print('✓ Successfully imported sgtsnepi')"
           
           echo ""
           echo "=== Test 2: Import sgtsnepi function ==="
-          python -c "from sgtsnepi.sgtsne import sgtsnepi; print('✓ Successfully imported sgtsnepi function')" || echo "✗ Failed to import sgtsnepi function"
+          python -c "from sgtsnepi.sgtsne import sgtsnepi; print('✓ Successfully imported sgtsnepi function')"
           
           echo ""
-          echo "=== Test 3: Import _sgtsnepi C extension (this is where DLL errors occur) ==="
-          python -c "
-          import sys
-          import os
-          try:
-              from sgtsnepi import _sgtsnepi
-              print('✓ Successfully imported _sgtsnepi C extension')
-          except ImportError as e:
-              print(f'✗ ImportError: {e}')
-              print(f'Error type: {type(e).__name__}')
-              print(f'Error args: {e.args}')
-              
-              # Show what's in the package directory
-              import sgtsnepi
-              pkg_dir = os.path.dirname(sgtsnepi.__file__)
-              print(f'\nPackage directory: {pkg_dir}')
-              print('Files in package:')
-              for root, dirs, files in os.walk(pkg_dir):
-                  for f in files:
-                      full_path = os.path.join(root, f)
-                      rel_path = os.path.relpath(full_path, pkg_dir)
-                      print(f'  {rel_path}')
-              
-              sys.exit(1)
-          " || exit 1
+          echo "=== Test 3: Import _sgtsnepi C extension ==="
+          python -c "from sgtsnepi import _sgtsnepi; print('✓ Successfully imported _sgtsnepi C extension')"
+          
+          echo ""
+          echo "=== All imports successful! ==="
 
   publish:
     needs: [build-wheels, test-linux-wheels, test-macos-wheels, test-windows-wheels]
