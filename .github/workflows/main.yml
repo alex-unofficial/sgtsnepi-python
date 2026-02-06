@@ -27,7 +27,9 @@ jobs:
           
           CIBW_BEFORE_BUILD_MACOS: "brew update && brew install fftw"
           CIBW_BEFORE_BUILD_LINUX: "yum install -y fftw-devel"
-          CIBW_BEFORE_BUILD_WINDOWS: >
+          
+          # Download and setup FFTW once for all Windows builds
+          CIBW_BEFORE_ALL_WINDOWS: >
             pip install delvewheel &&
             curl -L https://fftw.org/pub/fftw/fftw-3.3.5-dll64.zip -o fftw.zip &&
             unzip -q fftw.zip -d C:/fftw &&
