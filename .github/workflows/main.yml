@@ -238,14 +238,7 @@ jobs:
           
           echo "=== Installing wheel: $wheel ==="
           python -m pip install "$wheel"
-          
-          echo ""
-          echo "=== Installed package location: ==="
-          python -c "import sgtsnepi; import os; print(os.path.dirname(sgtsnepi.__file__))"
-          
-          echo ""
-          echo "=== Contents of sgtsnepi package directory: ==="
-          python -c "import sgtsnepi; import os; import glob; pkg_dir = os.path.dirname(sgtsnepi.__file__); print(f'Package dir: {pkg_dir}'); [print(f) for f in glob.glob(os.path.join(pkg_dir, '**'), recursive=True)]"
+          echo "✓ Wheel installed successfully"
       
       - name: Test import with diagnostics
         shell: bash
