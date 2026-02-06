@@ -45,7 +45,7 @@ jobs:
             export PATH=/mingw64/bin:\$PATH &&
             echo '=== BUILDING FFTW 3.3.10 FROM SOURCE ===' &&
             cd /tmp &&
-            curl -L http://www.fftw.org/fftw-3.3.10.tar.gz -o fftw.tar.gz &&
+            wget http://www.fftw.org/fftw-3.3.10.tar.gz -O fftw.tar.gz &&
             tar -xzf fftw.tar.gz &&
             cd fftw-3.3.10 &&
             echo '=== Building double precision FFTW ===' &&
