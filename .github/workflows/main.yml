@@ -70,13 +70,14 @@ jobs:
         run: |
           echo "=== BUILT WHEELS ===" 
           ls -lh dist
-          
-          echo -e "\n=== INSPECTING WINDOWS WHEELS ==="
+          echo ""
+          echo "=== INSPECTING WINDOWS WHEELS ==="
           for wheel in dist/*win*.whl; do
             if [ -f "$wheel" ]; then
               echo "Inspecting: $(basename $wheel)"
-              echo "  Size: $(du -h $wheel | cut -f1)"
+              ls -lh "$wheel"
               unzip -l "$wheel" | grep -E "(\.pyd|\.dll|\.libs)" | head -30
+              echo ""
             fi
           done || echo "No Windows wheels found or inspection failed"
 
