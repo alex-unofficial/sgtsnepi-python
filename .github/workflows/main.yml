@@ -29,22 +29,18 @@ jobs:
           CIBW_BEFORE_BUILD_LINUX: "yum install -y fftw-devel"
           CIBW_BEFORE_BUILD_WINDOWS: >
             pip install delvewheel &&
-            (if not exist C:\\vcpkg git clone --depth 1 https://github.com/microsoft/vcpkg.git C:\\vcpkg) &&
-            (if not exist C:\\vcpkg\\vcpkg.exe C:\\vcpkg\\bootstrap-vcpkg.bat) &&
-            C:\\vcpkg\\vcpkg.exe install fftw3:x64-windows-static pkgconf:x64-windows
+            curl -L https://fftw.org/fftw-3.3.10-dll64.zip -o C:\\fftw.zip &&
+            powershell -Command "Expand-Archive -Path C:\\fftw.zip -DestinationPath C:\\fftw -Force" &&
+            dir C:\\fftw
           
-          # Environment variables for Windows to help meson find FFTW via vcpkg
-          # Use static linking to avoid DLL issues with MinGW
+          # Environment variables for Windows to use pre-built MinGW-compatible FFTW
           CIBW_ENVIRONMENT_WINDOWS: >
-            PKG_CONFIG=C:\\vcpkg\\installed\\x64-windows-static\\tools\\pkgconf\\pkgconf.exe
-            PKG_CONFIG_PATH=C:\\vcpkg\\installed\\x64-windows-static\\lib\\pkgconfig
-            CMAKE_PREFIX_PATH=C:\\vcpkg\\installed\\x64-windows-static
-            CFLAGS=-IC:\\vcpkg\\installed\\x64-windows-static\\include
-            CXXFLAGS=-IC:\\vcpkg\\installed\\x64-windows-static\\include
-            LDFLAGS=-LC:\\vcpkg\\installed\\x64-windows-static\\lib
+            CFLAGS=-IC:\\fftw
+            CXXFLAGS=-IC:\\fftw
+            LDFLAGS=-LC:\\fftw
           
-          # Don't need delvewheel repair for static linking
-          CIBW_REPAIR_WHEEL_COMMAND_WINDOWS: ""
+          # Use delvewheel to bundle FFTW DLLs
+          CIBW_REPAIR_WHEEL_COMMAND_WINDOWS: "delvewheel repair --add-path C:\\fftw -w {dest_dir} {wheel}"
 
           # Only build 64-bit Linux wheels
           CIBW_ARCHS_LINUX: "x86_64"
