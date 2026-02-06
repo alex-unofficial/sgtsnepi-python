@@ -31,7 +31,7 @@ jobs:
             pip install delvewheel &&
             curl -L https://fftw.org/pub/fftw/fftw-3.3.5-dll64.zip -o fftw.zip &&
             unzip -q fftw.zip -d C:/fftw &&
-            dir C:/fftw
+            ls C:/fftw
           
           # Environment variables for Windows to use downloaded FFTW
           CIBW_ENVIRONMENT_WINDOWS: >
