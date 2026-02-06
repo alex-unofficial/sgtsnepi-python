@@ -46,7 +46,8 @@ jobs:
             echo '=== BUILDING FFTW 3.3.10 FROM SOURCE ===' &&
             cd /tmp &&
             /usr/bin/wget http://www.fftw.org/fftw-3.3.10.tar.gz -O fftw.tar.gz &&
-            /usr/bin/tar -xzf fftw.tar.gz &&
+            gunzip fftw.tar.gz &&
+            /usr/bin/tar -xf fftw.tar &&
             cd fftw-3.3.10 &&
             echo '=== Building double precision FFTW ===' &&
             ./configure --prefix=/usr/local --with-our-malloc16 --enable-shared --disable-static --enable-threads --with-combined-threads --enable-portable-binary --enable-sse2 --with-incoming-stack-boundary=2 &&
