@@ -255,19 +255,53 @@ jobs:
           cd "$TEST_DIR"
           echo "Testing from: $TEST_DIR"
           
-          echo "=== Test 1: Import sgtsnepi module ==="
-          python -c "from sgtsnepi import sgtsnepi; print('✓ Successfully imported sgtsnepi')"
+          python -c "
+          import sys
+          import os
+          print('Python version:', sys.version)
+          print('Platform:', sys.platform)
+          print('---')
           
-          echo ""
-          echo "=== Test 2: Import sgtsnepi function ==="
-          python -c "from sgtsnepi.sgtsne import sgtsnepi; print('✓ Successfully imported sgtsnepi function')"
+          # Find sgtsnepi package location
+          import sgtsnepi
+          pkg_path = os.path.dirname(sgtsnepi.__file__)
+          print('Package location:', pkg_path)
           
-          echo ""
-          echo "=== Test 3: Import _sgtsnepi C extension ==="
-          python -c "from sgtsnepi import _sgtsnepi; print('✓ Successfully imported _sgtsnepi C extension')"
+          # Check for .libs directory (created by delvewheel)
+          libs_dir = os.path.join(pkg_path, '.libs')
+          if os.path.exists(libs_dir):
+              print('Found .libs directory:', libs_dir)
+              print('DLL files:', [f for f in os.listdir(libs_dir) if f.endswith('.dll')])
+          else:
+              print('⚠ No .libs directory found')
           
-          echo ""
-          echo "=== All imports successful! ==="
+          print()
+          print('=== Attempting imports ===')
+          
+          # Test 1: Import sgtsnepi module
+          try:
+              from sgtsnepi import sgtsnepi as fn
+              print('✅ Test 1: Successfully imported sgtsnepi')
+          except ImportError as e:
+              print('❌ Test 1 failed:', e)
+              import traceback
+              traceback.print_exc()
+              sys.exit(1)
+          
+          # Test 2: Import C extension directly
+          try:
+              from sgtsnepi import _sgtsnepi
+              print('✅ Test 2: Successfully imported _sgtsnepi C extension')
+          except ImportError as e:
+              print('❌ Test 2 failed:', e)
+              import traceback
+              traceback.print_exc()
+              sys.exit(1)
+          
+          print()
+          print('✅ All imports successful!')
+          "
+
 
   publish:
     needs: [build-wheels, test-linux-wheels, test-macos-wheels, test-windows-wheels]
