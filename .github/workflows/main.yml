@@ -28,6 +28,7 @@ jobs:
           CIBW_BEFORE_BUILD_MACOS: "brew update && brew install fftw"
           CIBW_BEFORE_BUILD_LINUX: "yum install -y fftw-devel"
           CIBW_BEFORE_BUILD_WINDOWS: >
+            pip install delvewheel &&
             echo "=== BUILD DIAGNOSTICS ===" &&
             echo "Compiler check:" &&
             gcc --version || echo "gcc not found" &&
@@ -36,8 +37,7 @@ jobs:
             ls -la C:/msys64/mingw64/lib/libfftw* || echo "FFTW libs not found" &&
             ls -la C:/msys64/mingw64/include/fftw3.h || echo "FFTW header not found" &&
             echo "DLL location:" &&
-            ls -la C:/msys64/mingw64/bin/libfftw* || echo "FFTW DLLs not found" &&
-            pip install delvewheel
+            ls -la C:/msys64/mingw64/bin/libfftw* || echo "FFTW DLLs not found"
           
           # Install FFTW from MSYS2 once for all Windows builds (consistent MinGW toolchain)
           CIBW_BEFORE_ALL_WINDOWS: >
