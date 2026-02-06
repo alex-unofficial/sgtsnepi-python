@@ -114,6 +114,8 @@ jobs:
       - name: Test import
         shell: bash
         run: |
+          # Change to a different directory to avoid importing from source
+          cd /tmp 2>/dev/null || cd $TMPDIR 2>/dev/null || cd $HOME
           python -c "from sgtsnepi import sgtsnepi; print('Successfully imported sgtsnepi')"
           python -c "from sgtsnepi.sgtsne import sgtsnepi; print('Successfully imported sgtsnepi function')"
           python -c "from sgtsnepi import _sgtsnepi; print('Successfully imported _sgtsnepi C extension')"
