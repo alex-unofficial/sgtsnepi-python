@@ -241,53 +241,155 @@ jobs:
           # Create and use a clean temp directory (not $TMPDIR which can be in repo)
           TEST_DIR=$(mktemp -d)
           cd "$TEST_DIR"
-          echo "Testing from: $TEST_DIR"
+          
+          echo "=========================================="
+          echo "COMPREHENSIVE WINDOWS DIAGNOSTICS"
+          echo "=========================================="
           
           python -c "
           import sys
           import os
-          print('Python version:', sys.version)
-          print('Platform:', sys.platform)
-          print('---')
+          import glob
+          import traceback
+          import subprocess
           
-          # Find sgtsnepi package location
-          import sgtsnepi
-          pkg_path = os.path.dirname(sgtsnepi.__file__)
-          print('Package location:', pkg_path)
+          print('\n=== 1. SYSTEM INFORMATION ===')
+          print(f'Python version: {sys.version}')
+          print(f'Python executable: {sys.executable}')
+          print(f'Platform: {sys.platform}')
+          import platform
+          print(f'Architecture: {platform.machine()}')
+          print(f'Python compiler: {platform.python_compiler()}')
+          print(f'Working directory: {os.getcwd()}')
           
-          # Check for .libs directory (created by delvewheel)
-          libs_dir = os.path.join(pkg_path, '.libs')
-          if os.path.exists(libs_dir):
-              print('Found .libs directory:', libs_dir)
-              print('DLL files:', [f for f in os.listdir(libs_dir) if f.endswith('.dll')])
-          else:
-              print('⚠ No .libs directory found')
+          print('\n=== 2. FINDING SGTSNEPI PACKAGE ===')
+          try:
+              import sgtsnepi
+              pkg_path = os.path.dirname(sgtsnepi.__file__)
+              print(f'✓ Package found at: {pkg_path}')
+              
+              print('\n=== 3. PACKAGE CONTENTS ===')
+              for item in sorted(os.listdir(pkg_path)):
+                  item_path = os.path.join(pkg_path, item)
+                  if os.path.isdir(item_path):
+                      print(f'  [DIR]  {item}/')
+                  else:
+                      size = os.path.getsize(item_path)
+                      print(f'  [FILE] {item} ({size:,} bytes)')
+              
+              print('\n=== 4. DLL BUNDLING CHECK (.libs directory) ===')
+              libs_dir = os.path.join(pkg_path, '.libs')
+              print(f'Looking for: {libs_dir}')
+              print(f'Exists: {os.path.exists(libs_dir)}')
+              
+              if os.path.exists(libs_dir):
+                  print('Contents:')
+                  for dll in sorted(os.listdir(libs_dir)):
+                      dll_path = os.path.join(libs_dir, dll)
+                      size = os.path.getsize(dll_path)
+                      print(f'    {dll}: {size:,} bytes')
+              else:
+                  print('⚠️  WARNING: .libs directory NOT FOUND!')
+                  print('    Delvewheel may not have run or bundled DLLs incorrectly')
+              
+              print('\n=== 5. EXTENSION MODULE CHECK ===')
+              ext_pattern = os.path.join(pkg_path, '_sgtsnepi*.pyd')
+              ext_files = glob.glob(ext_pattern)
+              if ext_files:
+                  for ext_file in ext_files:
+                      size = os.path.getsize(ext_file)
+                      print(f'Found extension: {os.path.basename(ext_file)} ({size:,} bytes)')
+                      
+                      # Try to check dependencies
+                      print(f'\nAnalyzing dependencies of {os.path.basename(ext_file)}:')
+                      try:
+                          # Try objdump (from MinGW)
+                          result = subprocess.run(
+                              ['objdump', '-p', ext_file], 
+                              capture_output=True, 
+                              text=True, 
+                              timeout=10
+                          )
+                          if result.returncode == 0:
+                              lines = result.stdout.split('\n')
+                              dll_section = False
+                              print('  DLL dependencies:')
+                              for line in lines:
+                                  if 'DLL Name:' in line:
+                                      dll_section = True
+                                  if dll_section and '.dll' in line.lower():
+                                      print(f'    {line.strip()}')
+                                  if dll_section and line.strip() == '':
+                                      break
+                          else:
+                              print(f'  objdump failed (exit code {result.returncode})')
+                      except FileNotFoundError:
+                          print('  objdump not available')
+                      except Exception as e:
+                          print(f'  Could not analyze: {e}')
+              else:
+                  print('❌ ERROR: No _sgtsnepi extension module found!')
+                  print(f'   Searched for: {ext_pattern}')
+              
+          except ImportError as e:
+              print(f'❌ Cannot find sgtsnepi package: {e}')
+              print('This should not happen - package should be installed')
+              sys.exit(1)
           
-          print()
-          print('=== Attempting imports ===')
+          print('\n=== 6. ATTEMPTING IMPORTS ===')
           
-          # Test 1: Import sgtsnepi module
+          # Test 1: Import main module
+          print('\nTest 1: Import sgtsnepi module...')
+          try:
+              from sgtsnepi import sgtsne
+              print('✅ Successfully imported sgtsnepi.sgtsne module')
+          except Exception as e:
+              print(f'❌ Failed to import sgtsnepi.sgtsne module')
+              print(f'   Error: {e}')
+              traceback.print_exc()
+              print('\n=== FAILURE ANALYSIS ===')
+              if 'DLL load failed' in str(e):
+                  print('This is a Windows DLL loading error.')
+                  error_str = str(e).lower()
+                  if 'procedure' in error_str:
+                      print('Error contains \"procedure not found\" - this typically means:')
+                      print('  1. ABI incompatibility (different compiler versions)')
+                      print('  2. Extension compiled with different MinGW than DLLs')
+                      print('  3. Missing or incompatible C++ runtime libraries')
+                      print('  4. Symbol name mangling differences')
+                  elif 'module' in error_str or 'specified module' in error_str:
+                      print('Error contains \"module not found\" - this typically means:')
+                      print('  1. Required DLL not found in search path')
+                      print('  2. DLL architecture mismatch (32-bit vs 64-bit)')
+                      print('  3. Missing dependencies of the DLL itself')
+              sys.exit(1)
+          
+          # Test 2: Import function
+          print('\nTest 2: Import sgtsnepi function...')
           try:
               from sgtsnepi import sgtsnepi as fn
-              print('✅ Test 1: Successfully imported sgtsnepi')
-          except ImportError as e:
-              print('❌ Test 1 failed:', e)
-              import traceback
+              print('✅ Successfully imported sgtsnepi function')
+              print(f'   Function: {fn}')
+          except Exception as e:
+              print(f'❌ Failed to import sgtsnepi function')
+              print(f'   Error: {e}')
               traceback.print_exc()
               sys.exit(1)
           
-          # Test 2: Import C extension directly
+          # Test 3: Import C extension directly
+          print('\nTest 3: Import _sgtsnepi C extension directly...')
           try:
               from sgtsnepi import _sgtsnepi
-              print('✅ Test 2: Successfully imported _sgtsnepi C extension')
-          except ImportError as e:
-              print('❌ Test 2 failed:', e)
-              import traceback
+              print('✅ Successfully imported _sgtsnepi C extension')
+          except Exception as e:
+              print(f'❌ Failed to import _sgtsnepi C extension')
+              print(f'   Error: {e}')
               traceback.print_exc()
               sys.exit(1)
           
-          print()
-          print('✅ All imports successful!')
+          print('\n' + '='*50)
+          print('✅ ALL TESTS PASSED!')
+          print('='*50)
           "
 
 
