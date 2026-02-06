@@ -94,8 +94,14 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           python -m pip install numpy scipy nextprod
-          # Install the wheel for the current platform and Python version
-          python -m pip install dist/*.whl
+          # Find and install the wheel matching the current Python version
+          wheel=$(ls dist/*.whl | head -n 1)
+          if [ -f "$wheel" ]; then
+            python -m pip install "$wheel"
+          else
+            echo "No wheel found in dist/"
+            exit 1
+          fi
       
       - name: Test import
         shell: bash
