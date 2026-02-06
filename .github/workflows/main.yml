@@ -194,32 +194,97 @@ jobs:
           path: dist
           merge-multiple: true
       
-      - name: Install wheel and dependencies
+      - name: Inspect wheel contents
         shell: bash
         run: |
           python -m pip install --upgrade pip
-          python -m pip install numpy scipy nextprod
+          python -m pip install zipfile-cli || pip install wheel
+          
           # Get Python version tag
           python_tag=$(python -c "import sys; print(f'cp{sys.version_info.major}{sys.version_info.minor}')")
-          echo "Looking for wheel with tag: $python_tag"
-          # Find and install matching wheel
+          echo "=== Looking for wheel with tag: $python_tag ==="
+          
+          # Find matching wheel
           wheel=$(ls dist/*-${python_tag}-*.whl 2>/dev/null | head -n 1)
-          if [ -n "$wheel" ]; then
-            echo "Installing: $wheel"
-            python -m pip install "$wheel"
-          else
+          if [ -z "$wheel" ]; then
             echo "ERROR: No wheel found for $python_tag"
             ls -la dist/
             exit 1
           fi
+          
+          echo "=== Found wheel: $wheel ==="
+          ls -lh "$wheel"
+          
+          echo ""
+          echo "=== Wheel contents (first 50 files): ==="
+          python -m zipfile -l "$wheel" | head -50
+          
+          echo ""
+          echo "=== Looking for DLL files in wheel: ==="
+          python -m zipfile -l "$wheel" | grep -i "\.dll" || echo "No DLL files found in wheel!"
+          
+          echo ""
+          echo "=== Looking for .libs directory (delvewheel): ==="
+          python -m zipfile -l "$wheel" | grep -i "\.libs" || echo "No .libs directory found!"
       
-      - name: Test import
+      - name: Install wheel and dependencies
+        shell: bash
+        run: |
+          python -m pip install numpy scipy nextprod
+          
+          # Get Python version tag
+          python_tag=$(python -c "import sys; print(f'cp{sys.version_info.major}{sys.version_info.minor}')")
+          wheel=$(ls dist/*-${python_tag}-*.whl 2>/dev/null | head -n 1)
+          
+          echo "=== Installing wheel: $wheel ==="
+          python -m pip install "$wheel"
+          
+          echo ""
+          echo "=== Installed package location: ==="
+          python -c "import sgtsnepi; import os; print(os.path.dirname(sgtsnepi.__file__))"
+          
+          echo ""
+          echo "=== Contents of sgtsnepi package directory: ==="
+          python -c "import sgtsnepi; import os; import glob; pkg_dir = os.path.dirname(sgtsnepi.__file__); print(f'Package dir: {pkg_dir}'); [print(f) for f in glob.glob(os.path.join(pkg_dir, '**'), recursive=True)]"
+      
+      - name: Test import with diagnostics
         shell: bash
         run: |
           cd $TMPDIR
-          python -c "from sgtsnepi import sgtsnepi; print('✓ Successfully imported sgtsnepi')"
-          python -c "from sgtsnepi.sgtsne import sgtsnepi; print('✓ Successfully imported sgtsnepi function')"
-          python -c "from sgtsnepi import _sgtsnepi; print('✓ Successfully imported _sgtsnepi C extension')"
+          
+          echo "=== Test 1: Import sgtsnepi module ==="
+          python -c "from sgtsnepi import sgtsnepi; print('✓ Successfully imported sgtsnepi')" || echo "✗ Failed to import sgtsnepi"
+          
+          echo ""
+          echo "=== Test 2: Import sgtsnepi function ==="
+          python -c "from sgtsnepi.sgtsne import sgtsnepi; print('✓ Successfully imported sgtsnepi function')" || echo "✗ Failed to import sgtsnepi function"
+          
+          echo ""
+          echo "=== Test 3: Import _sgtsnepi C extension (this is where DLL errors occur) ==="
+          python -c "
+          import sys
+          import os
+          try:
+              from sgtsnepi import _sgtsnepi
+              print('✓ Successfully imported _sgtsnepi C extension')
+          except ImportError as e:
+              print(f'✗ ImportError: {e}')
+              print(f'Error type: {type(e).__name__}')
+              print(f'Error args: {e.args}')
+              
+              # Show what's in the package directory
+              import sgtsnepi
+              pkg_dir = os.path.dirname(sgtsnepi.__file__)
+              print(f'\nPackage directory: {pkg_dir}')
+              print('Files in package:')
+              for root, dirs, files in os.walk(pkg_dir):
+                  for f in files:
+                      full_path = os.path.join(root, f)
+                      rel_path = os.path.relpath(full_path, pkg_dir)
+                      print(f'  {rel_path}')
+              
+              sys.exit(1)
+          " || exit 1
 
   publish:
     needs: [build-wheels, test-linux-wheels, test-macos-wheels, test-windows-wheels]
