@@ -27,11 +27,24 @@ jobs:
           
           CIBW_BEFORE_BUILD_MACOS: "brew update && brew install fftw"
           CIBW_BEFORE_BUILD_LINUX: "yum install -y fftw-devel"
-          CIBW_BEFORE_BUILD_WINDOWS: "pip install delvewheel"
+          CIBW_BEFORE_BUILD_WINDOWS: >
+            echo "=== BUILD DIAGNOSTICS ===" &&
+            echo "Compiler check:" &&
+            gcc --version || echo "gcc not found" &&
+            g++ --version || echo "g++ not found" &&
+            echo "MSYS2 FFTW location:" &&
+            ls -la C:/msys64/mingw64/lib/libfftw* || echo "FFTW libs not found" &&
+            ls -la C:/msys64/mingw64/include/fftw3.h || echo "FFTW header not found" &&
+            echo "DLL location:" &&
+            ls -la C:/msys64/mingw64/bin/libfftw* || echo "FFTW DLLs not found" &&
+            pip install delvewheel
           
           # Install FFTW from MSYS2 once for all Windows builds (consistent MinGW toolchain)
           CIBW_BEFORE_ALL_WINDOWS: >
-            C:\\msys64\\usr\\bin\\bash.exe -lc "pacman -Sy --noconfirm mingw-w64-x86_64-fftw"
+            echo "=== INSTALLING FFTW FROM MSYS2 ===" &&
+            C:\\msys64\\usr\\bin\\bash.exe -lc "pacman -Sy --noconfirm mingw-w64-x86_64-fftw" &&
+            echo "=== VERIFYING INSTALLATION ===" &&
+            C:\\msys64\\usr\\bin\\bash.exe -lc "pacman -Ql mingw-w64-x86_64-fftw | grep -E '(\.dll|\.a|fftw3\.h)$' | head -20"
           
           # Environment variables for Windows to use MSYS2 FFTW
           CIBW_ENVIRONMENT_WINDOWS: >
@@ -54,7 +67,18 @@ jobs:
           output-dir: dist
 
       - name: Show built wheels
-        run: ls -l dist
+        run: |
+          echo "=== BUILT WHEELS ===" 
+          ls -lh dist
+          
+          echo -e "\n=== INSPECTING WINDOWS WHEELS ==="
+          for wheel in dist/*win*.whl; do
+            if [ -f "$wheel" ]; then
+              echo "Inspecting: $(basename $wheel)"
+              echo "  Size: $(du -h $wheel | cut -f1)"
+              unzip -l "$wheel" | grep -E "(\.pyd|\.dll|\.libs)" | head -30
+            fi
+          done || echo "No Windows wheels found or inspection failed"
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v6
