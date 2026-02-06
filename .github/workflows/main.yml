@@ -33,30 +33,44 @@ jobs:
             echo "Compiler check:" &&
             gcc --version || echo "gcc not found" &&
             g++ --version || echo "g++ not found" &&
-            echo "MSYS2 FFTW location:" &&
-            ls -la C:/msys64/mingw64/lib/libfftw* || echo "FFTW libs not found" &&
-            ls -la C:/msys64/mingw64/include/fftw3.h || echo "FFTW header not found" &&
-            echo "DLL location:" &&
-            ls -la C:/msys64/mingw64/bin/libfftw* || echo "FFTW DLLs not found"
+            echo "FFTW location:" &&
+            ls -la C:/fftw/libfftw* || echo "FFTW files not found" &&
+            ls -la C:/fftw/fftw3.h || echo "FFTW header not found"
           
-          # Install FFTW from MSYS2 once for all Windows builds (consistent MinGW toolchain)
+          # Build FFTW from source with current MinGW toolchain for ABI compatibility
           CIBW_BEFORE_ALL_WINDOWS: >
-            echo "=== UPDATING MSYS2 AND INSTALLING FFTW ===" &&
-            C:\\msys64\\usr\\bin\\bash.exe -lc "pacman -Syu --noconfirm" &&
-            C:\\msys64\\usr\\bin\\bash.exe -lc "pacman -S --noconfirm --needed mingw-w64-x86_64-fftw" &&
-            echo "=== VERIFYING INSTALLATION ===" &&
-            C:\\msys64\\usr\\bin\\bash.exe -lc "pacman -Ql mingw-w64-x86_64-fftw | grep -E '(\.dll|\.a|fftw3\.h)$' | head -20" &&
-            echo "=== CHECKING DLL DATES ===" &&
-            ls -la C:/msys64/mingw64/bin/libfftw*.dll
+            C:\\msys64\\usr\\bin\\bash.exe -lc "
+            echo '=== BUILDING FFTW 3.3.10 FROM SOURCE ===' &&
+            cd /tmp &&
+            curl -L http://www.fftw.org/fftw-3.3.10.tar.gz -o fftw.tar.gz &&
+            tar -xzf fftw.tar.gz &&
+            cd fftw-3.3.10 &&
+            echo '=== Building double precision FFTW ===' &&
+            ./configure --prefix=/usr/local --with-our-malloc16 --enable-shared --disable-static --enable-threads --with-combined-threads --enable-portable-binary --enable-sse2 --with-incoming-stack-boundary=2 &&
+            make -j4 &&
+            make install &&
+            echo '=== Building single precision FFTW ===' &&
+            make distclean &&
+            ./configure --prefix=/usr/local --enable-float --with-our-malloc16 --enable-shared --disable-static --enable-threads --with-combined-threads --enable-portable-binary --enable-sse2 --with-incoming-stack-boundary=2 &&
+            make -j4 &&
+            make install &&
+            echo '=== Installing to C:/fftw ===' &&
+            mkdir -p /c/fftw &&
+            cp /usr/local/bin/libfftw*.dll /c/fftw/ &&
+            cp /usr/local/include/fftw3.h /c/fftw/ &&
+            cp /usr/local/lib/libfftw*.dll.a /c/fftw/ &&
+            echo '=== FFTW Build Complete ===' &&
+            ls -lh /c/fftw/
+            "
           
-          # Environment variables for Windows to use MSYS2 FFTW
+          # Environment variables for Windows to use built FFTW
           CIBW_ENVIRONMENT_WINDOWS: >
-            CFLAGS=-IC:/msys64/mingw64/include
-            CXXFLAGS=-IC:/msys64/mingw64/include
-            LDFLAGS=-LC:/msys64/mingw64/lib
+            CFLAGS=-IC:/fftw
+            CXXFLAGS=-IC:/fftw
+            LDFLAGS=-LC:/fftw
           
-          # Use delvewheel to bundle FFTW DLLs from MSYS2
-          CIBW_REPAIR_WHEEL_COMMAND_WINDOWS: "delvewheel repair --add-path C:/msys64/mingw64/bin -w {dest_dir} {wheel}"
+          # Use delvewheel to bundle FFTW DLLs
+          CIBW_REPAIR_WHEEL_COMMAND_WINDOWS: "delvewheel repair --add-path C:/fftw -w {dest_dir} {wheel}"
 
           # Only build 64-bit Linux wheels
           CIBW_ARCHS_LINUX: "x86_64"
