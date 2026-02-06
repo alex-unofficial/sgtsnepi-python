@@ -30,17 +30,17 @@ jobs:
           CIBW_BEFORE_BUILD_WINDOWS: >
             pip install delvewheel &&
             curl -L https://fftw.org/pub/fftw/fftw-3.3.5-dll64.zip -o fftw.zip &&
-            unzip -q fftw.zip -d C:\\fftw &&
-            dir C:\\fftw
+            unzip -q fftw.zip -d C:/fftw &&
+            dir C:/fftw
           
           # Environment variables for Windows to use downloaded FFTW
           CIBW_ENVIRONMENT_WINDOWS: >
-            CFLAGS=-IC:\\fftw
-            CXXFLAGS=-IC:\\fftw
-            LDFLAGS=-LC:\\fftw
+            CFLAGS=-IC:/fftw
+            CXXFLAGS=-IC:/fftw
+            LDFLAGS=-LC:/fftw
           
           # Use delvewheel to bundle FFTW DLLs
-          CIBW_REPAIR_WHEEL_COMMAND_WINDOWS: "delvewheel repair --add-path C:\\fftw -w {dest_dir} {wheel}"
+          CIBW_REPAIR_WHEEL_COMMAND_WINDOWS: "delvewheel repair --add-path C:/fftw -w {dest_dir} {wheel}"
 
           # Only build 64-bit Linux wheels
           CIBW_ARCHS_LINUX: "x86_64"
