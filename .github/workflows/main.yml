@@ -39,6 +39,9 @@ jobs:
             PKG_CONFIG=C:\\vcpkg\\installed\\x64-windows-static\\tools\\pkgconf\\pkgconf.exe
             PKG_CONFIG_PATH=C:\\vcpkg\\installed\\x64-windows-static\\lib\\pkgconfig
             CMAKE_PREFIX_PATH=C:\\vcpkg\\installed\\x64-windows-static
+            CFLAGS=-IC:\\vcpkg\\installed\\x64-windows-static\\include
+            CXXFLAGS=-IC:\\vcpkg\\installed\\x64-windows-static\\include
+            LDFLAGS=-LC:\\vcpkg\\installed\\x64-windows-static\\lib
           
           # Don't need delvewheel repair for static linking
           CIBW_REPAIR_WHEEL_COMMAND_WINDOWS: ""
