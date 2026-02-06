@@ -38,8 +38,6 @@ jobs:
             PKG_CONFIG=C:\\vcpkg\\installed\\x64-windows\\tools\\pkgconf\\pkgconf.exe
             PKG_CONFIG_PATH=C:\\vcpkg\\installed\\x64-windows\\lib\\pkgconfig
             CMAKE_PREFIX_PATH=C:\\vcpkg\\installed\\x64-windows
-            CC=cl
-            CXX=cl
           
           # Use delvewheel to bundle FFTW DLL dependencies on Windows
           CIBW_REPAIR_WHEEL_COMMAND_WINDOWS: "delvewheel repair --add-path C:\\vcpkg\\installed\\x64-windows\\bin -w {dest_dir} {wheel}"
@@ -65,16 +63,16 @@ jobs:
           name: cibw-wheels-${{ matrix.os }}-${{ strategy.job-index }}
           path: dist/*.whl
 
-  test-wheels:
-    name: Test wheels on ${{ matrix.os }}
+  # Test each platform's wheels independently as soon as they're built
+  test-linux-wheels:
+    name: Test Linux wheels (Python ${{ matrix.python-version }})
     needs: [build-wheels]
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
         python-version: ['3.9', '3.12']
     
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     
     steps:
       - uses: actions/checkout@v6
@@ -84,10 +82,110 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
       
-      - name: Download wheels
+      - name: Download Linux wheels
         uses: actions/download-artifact@v7
         with:
-          pattern: cibw-wheels-${{ matrix.os }}-*
+          pattern: cibw-wheels-ubuntu-latest-*
+          path: dist
+          merge-multiple: true
+      
+      - name: Install wheel and dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install numpy scipy nextprod
+          # Get Python version tag
+          python_tag=$(python -c "import sys; print(f'cp{sys.version_info.major}{sys.version_info.minor}')")
+          echo "Looking for wheel with tag: $python_tag"
+          # Find and install matching wheel
+          wheel=$(ls dist/*-${python_tag}-*.whl 2>/dev/null | head -n 1)
+          if [ -n "$wheel" ]; then
+            echo "Installing: $wheel"
+            python -m pip install "$wheel"
+          else
+            echo "ERROR: No wheel found for $python_tag"
+            ls -la dist/
+            exit 1
+          fi
+      
+      - name: Test import
+        run: |
+          cd /tmp
+          python -c "from sgtsnepi import sgtsnepi; print('✓ Successfully imported sgtsnepi')"
+          python -c "from sgtsnepi.sgtsne import sgtsnepi; print('✓ Successfully imported sgtsnepi function')"
+          python -c "from sgtsnepi import _sgtsnepi; print('✓ Successfully imported _sgtsnepi C extension')"
+
+  test-macos-wheels:
+    name: Test macOS wheels (Python ${{ matrix.python-version }})
+    needs: [build-wheels]
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.9', '3.12']
+    
+    runs-on: macos-latest
+    
+    steps:
+      - uses: actions/checkout@v6
+      
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      
+      - name: Download macOS wheels
+        uses: actions/download-artifact@v7
+        with:
+          pattern: cibw-wheels-macos-latest-*
+          path: dist
+          merge-multiple: true
+      
+      - name: Install wheel and dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install numpy scipy nextprod
+          # Get Python version tag
+          python_tag=$(python -c "import sys; print(f'cp{sys.version_info.major}{sys.version_info.minor}')")
+          echo "Looking for wheel with tag: $python_tag"
+          # Find and install matching wheel
+          wheel=$(ls dist/*-${python_tag}-*.whl 2>/dev/null | head -n 1)
+          if [ -n "$wheel" ]; then
+            echo "Installing: $wheel"
+            python -m pip install "$wheel"
+          else
+            echo "ERROR: No wheel found for $python_tag"
+            ls -la dist/
+            exit 1
+          fi
+      
+      - name: Test import
+        run: |
+          cd /tmp
+          python -c "from sgtsnepi import sgtsnepi; print('✓ Successfully imported sgtsnepi')"
+          python -c "from sgtsnepi.sgtsne import sgtsnepi; print('✓ Successfully imported sgtsnepi function')"
+          python -c "from sgtsnepi import _sgtsnepi; print('✓ Successfully imported _sgtsnepi C extension')"
+
+  test-windows-wheels:
+    name: Test Windows wheels (Python ${{ matrix.python-version }})
+    needs: [build-wheels]
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.9', '3.12']
+    
+    runs-on: windows-latest
+    
+    steps:
+      - uses: actions/checkout@v6
+      
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      
+      - name: Download Windows wheels
+        uses: actions/download-artifact@v7
+        with:
+          pattern: cibw-wheels-windows-latest-*
           path: dist
           merge-multiple: true
       
@@ -96,34 +194,30 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           python -m pip install numpy scipy nextprod
-          # List wheels to debug
-          echo "Available wheels:"
-          ls -la dist/
-          # Get Python version in format cpXY (e.g., cp312, cp39)
+          # Get Python version tag
           python_tag=$(python -c "import sys; print(f'cp{sys.version_info.major}{sys.version_info.minor}')")
           echo "Looking for wheel with tag: $python_tag"
-          # Find wheel matching current Python version
+          # Find and install matching wheel
           wheel=$(ls dist/*-${python_tag}-*.whl 2>/dev/null | head -n 1)
-          if [ -z "$wheel" ]; then
-            echo "No wheel found matching Python tag $python_tag"
-            echo "Trying to install any compatible wheel..."
-            python -m pip install dist/*.whl || exit 1
-          else
-            echo "Installing wheel: $wheel"
+          if [ -n "$wheel" ]; then
+            echo "Installing: $wheel"
             python -m pip install "$wheel"
+          else
+            echo "ERROR: No wheel found for $python_tag"
+            ls -la dist/
+            exit 1
           fi
       
       - name: Test import
         shell: bash
         run: |
-          # Change to a different directory to avoid importing from source
-          cd /tmp 2>/dev/null || cd $TMPDIR 2>/dev/null || cd $HOME
-          python -c "from sgtsnepi import sgtsnepi; print('Successfully imported sgtsnepi')"
-          python -c "from sgtsnepi.sgtsne import sgtsnepi; print('Successfully imported sgtsnepi function')"
-          python -c "from sgtsnepi import _sgtsnepi; print('Successfully imported _sgtsnepi C extension')"
+          cd $TMPDIR
+          python -c "from sgtsnepi import sgtsnepi; print('✓ Successfully imported sgtsnepi')"
+          python -c "from sgtsnepi.sgtsne import sgtsnepi; print('✓ Successfully imported sgtsnepi function')"
+          python -c "from sgtsnepi import _sgtsnepi; print('✓ Successfully imported _sgtsnepi C extension')"
 
   publish:
-    needs: [build-wheels, test-wheels]
+    needs: [build-wheels, test-linux-wheels, test-macos-wheels, test-windows-wheels]
     environment: pypi
     permissions:
       id-token: write
