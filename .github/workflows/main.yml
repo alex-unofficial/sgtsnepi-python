@@ -31,19 +31,17 @@ jobs:
             pip install delvewheel &&
             (if not exist C:\\vcpkg git clone --depth 1 https://github.com/microsoft/vcpkg.git C:\\vcpkg) &&
             (if not exist C:\\vcpkg\\vcpkg.exe C:\\vcpkg\\bootstrap-vcpkg.bat) &&
-            C:\\vcpkg\\vcpkg.exe install fftw3:x64-windows pkgconf:x64-windows
+            C:\\vcpkg\\vcpkg.exe install fftw3:x64-windows-static pkgconf:x64-windows
           
           # Environment variables for Windows to help meson find FFTW via vcpkg
+          # Use static linking to avoid DLL issues with MinGW
           CIBW_ENVIRONMENT_WINDOWS: >
-            PKG_CONFIG=C:\\vcpkg\\installed\\x64-windows\\tools\\pkgconf\\pkgconf.exe
-            PKG_CONFIG_PATH=C:\\vcpkg\\installed\\x64-windows\\lib\\pkgconfig
-            CMAKE_PREFIX_PATH=C:\\vcpkg\\installed\\x64-windows
+            PKG_CONFIG=C:\\vcpkg\\installed\\x64-windows-static\\tools\\pkgconf\\pkgconf.exe
+            PKG_CONFIG_PATH=C:\\vcpkg\\installed\\x64-windows-static\\lib\\pkgconfig
+            CMAKE_PREFIX_PATH=C:\\vcpkg\\installed\\x64-windows-static
           
-          # Force meson to use MSVC on Windows
-          CIBW_CONFIG_SETTINGS_WINDOWS: "setup-args=--vsenv"
-          
-          # Use delvewheel to bundle FFTW DLL dependencies on Windows
-          CIBW_REPAIR_WHEEL_COMMAND_WINDOWS: "delvewheel repair --add-path C:\\vcpkg\\installed\\x64-windows\\bin -w {dest_dir} {wheel}"
+          # Don't need delvewheel repair for static linking
+          CIBW_REPAIR_WHEEL_COMMAND_WINDOWS: ""
 
           # Only build 64-bit Linux wheels
           CIBW_ARCHS_LINUX: "x86_64"
