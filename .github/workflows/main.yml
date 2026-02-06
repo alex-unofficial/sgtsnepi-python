@@ -94,13 +94,21 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           python -m pip install numpy scipy nextprod
-          # Find and install the wheel matching the current Python version
-          wheel=$(ls dist/*.whl | head -n 1)
-          if [ -f "$wheel" ]; then
-            python -m pip install "$wheel"
+          # List wheels to debug
+          echo "Available wheels:"
+          ls -la dist/
+          # Get Python version in format cpXY (e.g., cp312, cp39)
+          python_tag=$(python -c "import sys; print(f'cp{sys.version_info.major}{sys.version_info.minor}')")
+          echo "Looking for wheel with tag: $python_tag"
+          # Find wheel matching current Python version
+          wheel=$(ls dist/*-${python_tag}-*.whl 2>/dev/null | head -n 1)
+          if [ -z "$wheel" ]; then
+            echo "No wheel found matching Python tag $python_tag"
+            echo "Trying to install any compatible wheel..."
+            python -m pip install dist/*.whl || exit 1
           else
-            echo "No wheel found in dist/"
-            exit 1
+            echo "Installing wheel: $wheel"
+            python -m pip install "$wheel"
           fi
       
       - name: Test import
