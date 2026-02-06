@@ -32,6 +32,7 @@ jobs:
             curl -L https://fftw.org/pub/fftw/fftw-3.3.5-dll64.zip -o fftw.zip &&
             unzip -q fftw.zip -d C:/fftw &&
             cd C:/fftw &&
+            ls -la &&
             dlltool -d libfftw3-3.def -l libfftw3.dll.a &&
             dlltool -d libfftw3f-3.def -l libfftw3f.dll.a &&
             dlltool -d libfftw3l-3.def -l libfftw3l.dll.a &&
