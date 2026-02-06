@@ -37,9 +37,6 @@ jobs:
             PKG_CONFIG=C:\\vcpkg\\installed\\x64-windows\\tools\\pkgconf\\pkgconf.exe
             PKG_CONFIG_PATH=C:\\vcpkg\\installed\\x64-windows\\lib\\pkgconfig
             CMAKE_PREFIX_PATH=C:\\vcpkg\\installed\\x64-windows
-          
-          # Use delvewheel to bundle DLL dependencies on Windows
-          CIBW_REPAIR_WHEEL_COMMAND_WINDOWS: "delvewheel repair -w {dest_dir} {wheel}"
 
           # Only build 64-bit Linux wheels
           CIBW_ARCHS_LINUX: "x86_64"

@@ -35,9 +35,6 @@ jobs:
             PKG_CONFIG_PATH=C:\\vcpkg\\installed\\x64-windows\\lib\\pkgconfig
             CMAKE_PREFIX_PATH=C:\\vcpkg\\installed\\x64-windows
 
-          # Use delvewheel to bundle DLL dependencies on Windows
-          CIBW_REPAIR_WHEEL_COMMAND_WINDOWS: "delvewheel repair -w {dest_dir} {wheel}"
-
           # Only build 64-bit manylinux wheels, skip musllinux
           CIBW_ARCHS_LINUX: "x86_64"
           CIBW_SKIP: "*-win32 *-musllinux_*"
