@@ -80,6 +80,7 @@ jobs:
               echo ""
             fi
           done || echo "No Windows wheels found or inspection failed"
+        shell: bash
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v6
