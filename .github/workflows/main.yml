@@ -30,12 +30,9 @@ jobs:
           CIBW_BEFORE_BUILD_WINDOWS: >
             pip install delvewheel &&
             curl -L https://fftw.org/pub/fftw/fftw-3.3.5-dll64.zip -o fftw.zip &&
-            unzip -q fftw.zip -d C:/fftw &&
-            ls -la C:/fftw &&
-            find C:/fftw -name "*.def" &&
+            unzip -q fftw.zip &&
+            mv fftw-3.3.5-dll64 C:/fftw &&
             cd C:/fftw &&
-            (test -f libfftw3-3.def || cd */) &&
-            pwd &&
             ls -la &&
             dlltool -d libfftw3-3.def -l libfftw3.dll.a &&
             dlltool -d libfftw3f-3.def -l libfftw3f.dll.a &&
