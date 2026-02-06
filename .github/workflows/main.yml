@@ -29,23 +29,18 @@ jobs:
           CIBW_BEFORE_BUILD_LINUX: "yum install -y fftw-devel"
           CIBW_BEFORE_BUILD_WINDOWS: "pip install delvewheel"
           
-          # Download and setup FFTW once for all Windows builds
+          # Install FFTW from MSYS2 once for all Windows builds (consistent MinGW toolchain)
           CIBW_BEFORE_ALL_WINDOWS: >
-            curl -L https://fftw.org/pub/fftw/fftw-3.3.5-dll64.zip -o fftw.zip &&
-            unzip -q fftw.zip -d C:/fftw &&
-            ls -la C:/fftw &&
-            dlltool -d C:/fftw/libfftw3-3.def -l C:/fftw/libfftw3.dll.a &&
-            dlltool -d C:/fftw/libfftw3f-3.def -l C:/fftw/libfftw3f.dll.a &&
-            dlltool -d C:/fftw/libfftw3l-3.def -l C:/fftw/libfftw3l.dll.a
+            C:\\msys64\\usr\\bin\\bash.exe -lc "pacman -Sy --noconfirm mingw-w64-x86_64-fftw"
           
-          # Environment variables for Windows to use downloaded FFTW
+          # Environment variables for Windows to use MSYS2 FFTW
           CIBW_ENVIRONMENT_WINDOWS: >
-            CFLAGS=-IC:/fftw
-            CXXFLAGS=-IC:/fftw
-            LDFLAGS=-LC:/fftw
+            CFLAGS=-IC:/msys64/mingw64/include
+            CXXFLAGS=-IC:/msys64/mingw64/include
+            LDFLAGS=-LC:/msys64/mingw64/lib
           
-          # Use delvewheel to bundle FFTW DLLs
-          CIBW_REPAIR_WHEEL_COMMAND_WINDOWS: "delvewheel repair --add-path C:/fftw -w {dest_dir} {wheel}"
+          # Use delvewheel to bundle FFTW DLLs from MSYS2
+          CIBW_REPAIR_WHEEL_COMMAND_WINDOWS: "delvewheel repair --add-path C:/msys64/mingw64/bin -w {dest_dir} {wheel}"
 
           # Only build 64-bit Linux wheels
           CIBW_ARCHS_LINUX: "x86_64"
