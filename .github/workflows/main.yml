@@ -124,7 +124,7 @@ jobs:
 
       - name: Install wheel for current Python
         if: matrix.dist-type == 'wheel'
-        run: pip install --no-index --find-links=dist sgtsnepi
+        run: pip install --find-links=dist sgtsnepi
 
       - name: Install from sdist
         if: matrix.dist-type == 'sdist'
