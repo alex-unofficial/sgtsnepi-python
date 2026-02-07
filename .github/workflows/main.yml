@@ -133,8 +133,14 @@ jobs:
       - name: Show installed packages
         run: pip list
 
+      - name: Install pytest for testing
+        run: pip install pytest
+
       - name: Run import tests
         run: python tests/test_imports.py
+
+      - name: Run test suite
+        run: pytest tests/test_sgtsnepi.py -v
 
   publish:
     needs: [build-wheels, build-sdist, test-distributions]
