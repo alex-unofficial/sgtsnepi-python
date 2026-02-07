@@ -1,7 +1,7 @@
 name: Build and Test Distributions
 on:
   push:
-    branches: [ "master", "feat/sdist-testing" ]
+    branches: [ "master" ]
     tags: [ "v*" ]
   pull_request:
     branches: [ "master" ]
