@@ -11,7 +11,8 @@ a d-dimensional space (d=1,2,3) on a shared-memory computer.
 
 ### Prerequisites
 
-`sgtsnepi` supports Linux, macOS, and Windows.
+`sgtsnepi` supports Linux and macOS.
+Windows support is coming soon.
 
 Installation requires `Python 3.9` or higher.
 
