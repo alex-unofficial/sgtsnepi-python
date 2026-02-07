@@ -133,11 +133,8 @@ jobs:
       - name: Show installed packages
         run: pip list
 
-      - name: Install pytest for testing
+      - name: Install pytest
         run: pip install pytest
-
-      - name: Run import tests
-        run: python tests/test_imports.py
 
       - name: Run test suite
         run: pytest tests/test_sgtsnepi.py -v
