@@ -1,7 +1,7 @@
-name: Build Wheels (Linux + macOS + Windows)
+name: Build and Test Distributions
 on:
   push:
-    branches: [ "master" ]
+    branches: [ "master", "feat/sdist-testing" ]
     tags: [ "v*" ]
   pull_request:
     branches: [ "master" ]
@@ -59,8 +59,76 @@ jobs:
           name: cibw-wheels-${{ matrix.os }}-${{ strategy.job-index }}
           path: dist/*.whl
 
+  build-sdist:
+    name: Build source distribution
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Build sdist
+        run: pipx run build --sdist
+
+      - name: Show built sdist
+        run: ls -l dist
+
+      - name: Upload sdist artifact
+        uses: actions/upload-artifact@v6
+        with:
+          name: sdist
+          path: dist/*.tar.gz
+
+  test-distributions:
+    name: Test ${{ matrix.dist-type }} on ${{ matrix.os }}
+    needs: [build-wheels, build-sdist]
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        dist-type: [wheel, sdist]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Install FFTW (macOS)
+        if: matrix.os == 'macos-latest' && matrix.dist-type == 'sdist'
+        run: brew install fftw
+
+      - name: Install FFTW (Linux)
+        if: matrix.os == 'ubuntu-latest' && matrix.dist-type == 'sdist'
+        run: sudo apt-get update && sudo apt-get install -y libfftw3-dev
+
+      - name: Download wheel artifacts
+        if: matrix.dist-type == 'wheel'
+        uses: actions/download-artifact@v7
+        with:
+          pattern: cibw-wheels-${{ matrix.os }}-*
+          path: dist
+          merge-multiple: true
+
+      - name: Download sdist artifact
+        if: matrix.dist-type == 'sdist'
+        uses: actions/download-artifact@v7
+        with:
+          name: sdist
+          path: dist
+
+      - name: Show downloaded distributions
+        run: ls -l dist
+
+      - name: Install distribution
+        run: |
+          pip install dist/*
+          pip list
+
+      - name: Run import tests
+        run: python tests/test_imports.py
+
   publish:
-    needs: [build-wheels]
+    needs: [build-wheels, build-sdist, test-distributions]
     environment: pypi
     permissions:
       id-token: write
@@ -77,7 +145,13 @@ jobs:
           path: dist
           merge-multiple: true
 
-      - name: Show downloaded wheels
+      - name: Download sdist
+        uses: actions/download-artifact@v7
+        with:
+          name: sdist
+          path: dist
+
+      - name: Show all distributions
         run: ls -l dist
 
       - name: Publish to PyPI
