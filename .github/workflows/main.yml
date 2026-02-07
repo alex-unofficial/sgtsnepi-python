@@ -65,6 +65,9 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
+      - name: Install FFTW
+        run: sudo apt-get update && sudo apt-get install -y libfftw3-dev
+
       - name: Build sdist
         run: pipx run build --sdist
 
