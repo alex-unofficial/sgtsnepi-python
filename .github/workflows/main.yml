@@ -122,10 +122,16 @@ jobs:
       - name: Show downloaded distributions
         run: ls -l dist
 
-      - name: Install distribution
-        run: |
-          pip install dist/*
-          pip list
+      - name: Install wheel for current Python
+        if: matrix.dist-type == 'wheel'
+        run: pip install --no-index --find-links=dist sgtsnepi
+
+      - name: Install from sdist
+        if: matrix.dist-type == 'sdist'
+        run: pip install dist/*.tar.gz
+
+      - name: Show installed packages
+        run: pip list
 
       - name: Run import tests
         run: python tests/test_imports.py
