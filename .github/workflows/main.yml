@@ -53,7 +53,7 @@ jobs:
         run: ls -l dist
 
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           # We'll name each artifact distinctly, so we can download them all later
           name: cibw-wheels-${{ matrix.os }}-${{ strategy.job-index }}
@@ -75,7 +75,7 @@ jobs:
         run: ls -l dist
 
       - name: Upload sdist artifact
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: sdist
           path: dist/*.tar.gz
@@ -106,7 +106,7 @@ jobs:
 
       - name: Download wheel artifacts
         if: matrix.dist-type == 'wheel'
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           pattern: cibw-wheels-${{ matrix.os }}-*
           path: dist
@@ -114,7 +114,7 @@ jobs:
 
       - name: Download sdist artifact
         if: matrix.dist-type == 'sdist'
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           name: sdist
           path: dist
@@ -151,14 +151,14 @@ jobs:
 
     steps:
       - name: Download wheels
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           pattern: cibw-*
           path: dist
           merge-multiple: true
 
       - name: Download sdist
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           name: sdist
           path: dist

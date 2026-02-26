@@ -51,7 +51,7 @@ jobs:
         run: ls -l dist
 
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           # We'll name each artifact distinctly, so we can download them all later
           name: dist-${{ matrix.os }}
