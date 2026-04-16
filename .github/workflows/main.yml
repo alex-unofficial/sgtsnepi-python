@@ -19,7 +19,7 @@ jobs:
       - uses: actions/checkout@v6
 
       - name: Build Wheels using cibuildwheel
-        uses: pypa/cibuildwheel@v3.4.0
+        uses: pypa/cibuildwheel@v3.4.1
         env:
           # Skip Python versions older than 3.9 (matches pyproject.toml python-requires)
           # This allows automatic building for new Python versions as they're added to cibuildwheel
