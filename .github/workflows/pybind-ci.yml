@@ -13,13 +13,13 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - name: Check out code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       # ------------------------------------------
       # Build Wheels Using cibuildwheel
       # ------------------------------------------
       - name: Build Wheels
-        uses: pypa/cibuildwheel@v3.4.1
+        uses: pypa/cibuildwheel@v4.1.0
         env:
           CIBW_BUILD: "cp39-* cp310-* cp311-* cp312-*"
           CIBW_BEFORE_BUILD_MACOS: "brew update && brew install fftw"
