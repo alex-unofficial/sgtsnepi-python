@@ -44,8 +44,8 @@ namespace {
 // pipe or file -- instead of forcing it to the terminal and silently breaking
 // shell redirection.
 //
-// Because the descriptors are never closed, their numbers never become
-// available for reuse, so a concurrent open() in another thread cannot be
+// dup2 performs an atomic replacement of the target descriptor, so there is no
+// close-then-open window where a concurrent open() in another thread could be
 // handed fd 1 or 2 mid-call.
 //
 // RAII, so the restore also happens when the computation throws. A manual
@@ -62,7 +62,16 @@ public:
         std::fflush(stderr);
 
         saved_out_ = dup_(fileno_(stdout));
+        if (saved_out_ < 0) {
+            return;
+        }
+
         saved_err_ = dup_(fileno_(stderr));
+        if (saved_err_ < 0) {
+            close_(saved_out_);
+            saved_out_ = -1;
+            return;
+        }
 
         const int devnull = open_null_();
         if (devnull >= 0) {
