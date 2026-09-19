@@ -19,7 +19,7 @@ jobs:
       - uses: actions/checkout@v7
 
       - name: Build Wheels using cibuildwheel
-        uses: pypa/cibuildwheel@v4.1.0
+        uses: pypa/cibuildwheel@v4.2.0
         env:
           CIBW_SKIP: "*-win32 *-musllinux_*"
           
